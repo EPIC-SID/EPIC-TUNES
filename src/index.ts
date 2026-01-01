@@ -31,6 +31,9 @@ async function loadExtractors() {
 
 loadExtractors();
 
+// Import player events
+require('./events/playerEvents');
+
 // Command handler setup
 (client as any).commands = new Collection();
 
