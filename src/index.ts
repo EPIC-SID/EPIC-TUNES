@@ -1,34 +1,18 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
-import { Player } from 'discord-player';
+import { client, player } from './client.js';
 import { DefaultExtractors } from '@discord-player/extractor';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { Collection } from 'discord.js';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
-
-// Initialize the Player
-export const player = new Player(client);
-
 // Load default extractors
-async function loadExtractors() {
-    await player.extractors.loadDefault();
-}
-
-loadExtractors();
+await player.extractors.loadMulti(DefaultExtractors);
 
 // Import player events
 await import('./events/playerEvents.js');
@@ -37,11 +21,12 @@ await import('./events/playerEvents.js');
 (client as any).commands = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
+const commandFiles = fs.readdirSync(commandsPath).filter(file => 
+    (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')
+);
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    // In ESM, we use dynamic import
     const command = await import(`file://${filePath}`);
     if ('data' in command.default && 'execute' in command.default) {
         (client as any).commands.set(command.default.data.name, command.default);

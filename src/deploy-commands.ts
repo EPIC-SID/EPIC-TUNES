@@ -11,7 +11,10 @@ const __dirname = path.dirname(__filename);
 
 const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
+// Filter for .ts or .js files, BUT exclude .d.ts files
+const commandFiles = fs.readdirSync(commandsPath).filter(file => 
+    (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')
+);
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);

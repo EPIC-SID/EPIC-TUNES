@@ -1,4 +1,4 @@
-import { player } from '../index.js';
+import { player } from '../client.js';
 
 player.events.on('playerStart', (queue, track) => {
     const interaction = queue.metadata as any;
