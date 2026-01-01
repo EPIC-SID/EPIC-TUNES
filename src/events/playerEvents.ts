@@ -1,4 +1,4 @@
-import { player } from '../index';
+import { player } from '../index.js';
 
 player.events.on('playerStart', (queue, track) => {
     const interaction = queue.metadata as any;
@@ -6,7 +6,7 @@ player.events.on('playerStart', (queue, track) => {
 });
 
 player.events.on('audioTrackAdd', (queue, track) => {
-    // We already send a message in the play command, but we could add more here if needed
+    // We already send a message in the play command
 });
 
 player.events.on('error', (queue, error) => {

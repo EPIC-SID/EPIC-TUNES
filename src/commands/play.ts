@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
         .setName('play')
         .setDescription('Plays a song from YouTube, Spotify, etc.')

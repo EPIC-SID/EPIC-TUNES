@@ -1,12 +1,12 @@
 import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
 import { useQueue } from 'discord-player';
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
         .setName('queue')
         .setDescription('Shows the current music queue'),
     async execute(interaction: any) {
-        const queue = useQueue(interaction.guildId);
+        const queue = useQueue(interaction.guildId!);
 
         if (!queue || !queue.tracks.size) {
             return interaction.reply({ content: 'The queue is currently empty!', ephemeral: true });

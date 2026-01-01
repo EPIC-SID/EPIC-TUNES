@@ -4,8 +4,12 @@ import { DefaultExtractors } from '@discord-player/extractor';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const client = new Client({
     intents: [
@@ -17,14 +21,9 @@ export const client = new Client({
 });
 
 // Initialize the Player
-export const player = new Player(client, {
-    ytdlOptions: {
-        quality: 'highestaudio',
-        highWaterMark: 1 << 25
-    }
-});
+export const player = new Player(client);
 
-// Load default extractors (YouTube, Spotify, etc.)
+// Load default extractors
 async function loadExtractors() {
     await player.extractors.loadDefault();
 }
@@ -32,7 +31,7 @@ async function loadExtractors() {
 loadExtractors();
 
 // Import player events
-require('./events/playerEvents');
+await import('./events/playerEvents.js');
 
 // Command handler setup
 (client as any).commands = new Collection();
@@ -42,9 +41,10 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    if ('data' in command && 'execute' in command) {
-        (client as any).commands.set(command.data.name, command);
+    // In ESM, we use dynamic import
+    const command = await import(`file://${filePath}`);
+    if ('data' in command.default && 'execute' in command.default) {
+        (client as any).commands.set(command.default.data.name, command.default);
     }
 }
 
@@ -60,7 +60,11 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+        } else {
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
     }
 });
 
