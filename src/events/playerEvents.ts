@@ -10,9 +10,20 @@ player.events.on('audioTrackAdd', (queue, track) => {
 });
 
 player.events.on('error', (queue, error) => {
-    console.log(`[Error] ${error.message}`);
+    console.error(`[General Error] ${error.message}`);
+    console.error(error);
 });
 
 player.events.on('playerError', (queue, error) => {
-    console.log(`[Player Error] ${error.message}`);
+    console.error(`[Player Error] ${error.message}`);
+    console.error(error);
+});
+
+player.events.on('debug', (queue, message) => {
+    // Only log important debug messages to avoid console spam
+    console.log(`[Debug] ${message}`);
+});
+
+player.on('debug', (message) => {
+    console.log(`[General Debug] ${message}`);
 });
