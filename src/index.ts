@@ -17,7 +17,7 @@ await import('./events/playerEvents.js');
 (client as any).commands = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => 
+const commandFiles = fs.readdirSync(commandsPath).filter(file =>
     (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')
 );
 
@@ -49,8 +49,32 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log(`🚀 Bot is online as ${client.user?.tag}!`);
+
+    const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
+
+    try {
+        console.log('Started refreshing application (/) commands.');
+
+        // Register Globally (Primary)
+        await client.application?.commands.set(commandData);
+
+        // Clear per-guild commands to prevent duplicates (Global takes precedence)
+        const guilds = client.guilds.cache;
+        for (const [id, guild] of guilds) {
+            try {
+                await guild.commands.set([]); // Clear guild commands
+                console.log(`Cleared guild-specific commands in: ${guild.name} (${id})`);
+            } catch (error) {
+                console.error(`Failed to clear guild commands in ${guild.name}:`, error);
+            }
+        }
+
+        console.log('Successfully reloaded application (/) commands globally and cleaned up guild duplicates.');
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 client.login(process.env.DISCORD_TOKEN);
