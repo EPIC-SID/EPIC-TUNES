@@ -26,6 +26,7 @@ for (const file of commandFiles) {
     const command = await import(`file://${filePath}`);
     if ('data' in command.default && 'execute' in command.default) {
         (client as any).commands.set(command.default.data.name, command.default);
+        console.log(`Loaded command: ${command.default.data.name}`);
     }
 }
 
@@ -98,7 +99,9 @@ client.on('messageCreate', async (message) => {
         replied: false,
         deferred: false,
         member: message.member,
+        user: message.author, // Fix: Add user property
         guildId: message.guildId,
+        guild: message.guild, // Fix: Add guild property as help.ts uses it
         client: client,
         channel: message.channel,
         options: {
