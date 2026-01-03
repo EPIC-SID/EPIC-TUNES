@@ -26,8 +26,35 @@ export default {
         try {
             // Check if query is a URL
             const isUrl = /^(https?:\/\/)/.test(query);
+            const isSpotifyTrack = query.includes('spotify.com/track/');
 
-            if (!isUrl) {
+            if (isSpotifyTrack) {
+                await interaction.editReply({ content: '🎵 Spotify link detected! Converting to YouTube for stable playback...' });
+                try {
+                    // Fetch Spotify page to get metadata
+                    const response = await fetch(query);
+                    const text = await response.text();
+                    const titleMatch = text.match(/<title>(.*?)<\/title>/);
+
+                    if (titleMatch && titleMatch[1]) {
+                        // Title format is usually "Song - Artist | Spotify" or "Song - song by Artist | Spotify"
+                        let searchTerm = titleMatch[1].replace(' | Spotify', '').replace(' - song by', ' -').trim();
+
+                        await interaction.editReply({ content: `🔍 Found: **${searchTerm}**\nFinding best YouTube match...` });
+
+                        const searchResults = await yts(searchTerm);
+                        if (searchResults && searchResults.videos.length > 0) {
+                            query = searchResults.videos[0].url;
+                            await interaction.editReply({ content: `▶️ Playing: **${searchResults.videos[0].title}**` });
+                        } else {
+                            await interaction.editReply({ content: '⚠️ Could not find a match on YouTube. Trying original link...' });
+                        }
+                    }
+                } catch (err) {
+                    console.error('Spotify fetch error:', err);
+                    await interaction.editReply({ content: '⚠️ Could not fetch Spotify metadata. Trying original link...' });
+                }
+            } else if (!isUrl) {
                 const searchResults = await yts(query);
                 if (!searchResults || !searchResults.videos.length) {
                     return interaction.editReply({ content: '❌ No results found on YouTube.' });

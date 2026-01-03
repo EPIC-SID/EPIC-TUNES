@@ -28,14 +28,29 @@ const cookies = (() => {
 
 export const distube = new DisTube(client, {
     emitNewSongOnly: false,
+    nsfw: true, // sometimes helps with restricted content
     ffmpeg: {
-        path: ffmpeg || undefined
+        path: ffmpeg || undefined,
+        args: {
+            global: {
+                'reconnect': '1',
+                'reconnect_streamed': '1',
+                'reconnect_delay_max': '5',
+                'reconnect_at_eof': '1',
+                'reconnect_on_network_error': '1'
+            }
+        }
     },
     plugins: [
         new SpotifyPlugin(),
         new SoundCloudPlugin(),
         new YtDlpPlugin({
-            cookies: cookies
+            cookies: cookies,
+            httpChunkSize: 1048576,
+            ytdlOptions: {
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
+            }
         } as any)
     ]
 } as any);
