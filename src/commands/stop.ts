@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
-import { useQueue } from 'discord-player';
+import { distube } from '../client.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -7,17 +7,22 @@ export default {
         .setDescription('Stops the music and clears the queue'),
     async execute(interaction: any) {
         const member = interaction.member as GuildMember;
-        const queue = useQueue(interaction.guildId!);
-
+        
         if (!member.voice.channel) {
             return interaction.reply({ content: 'You need to be in a voice channel!', ephemeral: true });
         }
+
+        const queue = distube.getQueue(interaction.guildId!);
 
         if (!queue) {
             return interaction.reply({ content: 'There is no music playing!', ephemeral: true });
         }
 
-        queue.delete();
-        return interaction.reply('🛑 Stopped the music and disconnected!');
+        try {
+            distube.stop(interaction.guildId!);
+            return interaction.reply('🛑 Stopped the music!');
+        } catch (e) {
+            return interaction.reply(`Error stopping: ${e}`);
+        }
     },
 };

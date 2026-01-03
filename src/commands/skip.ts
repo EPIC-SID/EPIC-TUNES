@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, GuildMember } from 'discord.js';
-import { useQueue } from 'discord-player';
+import { distube } from '../client.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -7,17 +7,23 @@ export default {
         .setDescription('Skips the current song'),
     async execute(interaction: any) {
         const member = interaction.member as GuildMember;
-        const queue = useQueue(interaction.guildId!);
-
+        
         if (!member.voice.channel) {
             return interaction.reply({ content: 'You need to be in a voice channel!', ephemeral: true });
         }
 
-        if (!queue || !queue.isPlaying()) {
+        const queue = distube.getQueue(interaction.guildId!);
+
+        if (!queue) {
             return interaction.reply({ content: 'There is no music playing!', ephemeral: true });
         }
 
-        queue.node.skip();
-        return interaction.reply('⏩ Skipped the current song!');
+        try {
+            await distube.skip(interaction.guildId!);
+            return interaction.reply('⏩ Skipped the current song!');
+        } catch (e) {
+            // Usually throws if there is no up next song
+            return interaction.reply({ content: '❌ No more songs to skip to (or error)!', ephemeral: true });
+        }
     },
 };

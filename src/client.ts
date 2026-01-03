@@ -1,5 +1,8 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
-import { Player } from 'discord-player';
+import { Client, GatewayIntentBits } from 'discord.js';
+import { DisTube } from 'distube';
+import { SpotifyPlugin } from '@distube/spotify';
+import { SoundCloudPlugin } from '@distube/soundcloud';
+import { YtDlpPlugin } from '@distube/yt-dlp';
 
 export const client = new Client({
     intents: [
@@ -10,4 +13,13 @@ export const client = new Client({
     ]
 });
 
-export const player = new Player(client);
+export const distube = new DisTube(client, {
+    emitNewSongOnly: true,
+    emitAddSongWhenCreatingQueue: false,
+    emitAddListWhenCreatingQueue: false,
+    plugins: [
+        new SpotifyPlugin(),
+        new SoundCloudPlugin(),
+        new YtDlpPlugin()
+    ]
+});

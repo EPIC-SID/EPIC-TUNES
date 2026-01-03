@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
-import { useMainPlayer, QueryType } from 'discord-player';
+import { SlashCommandBuilder, GuildMember } from 'discord.js';
+import { distube } from '../client.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -10,38 +10,24 @@ export default {
                 .setDescription('The song you want to play (link or name)')
                 .setRequired(true)),
     async execute(interaction: any) {
-        const player = useMainPlayer();
         const query = interaction.options.getString('query', true);
         const member = interaction.member as GuildMember;
+        const voiceChannel = member.voice.channel;
 
-        if (!member.voice.channel) {
+        if (!voiceChannel) {
             return interaction.reply({ content: 'You need to be in a voice channel to play music!', ephemeral: true });
         }
 
-        await interaction.deferReply();
+        await interaction.reply({ content: '🔍 Searching and adding to queue...', ephemeral: true });
 
         try {
-            console.log(`[Play Command] Query: ${query}`);
-            const res = await player.play(member.voice.channel, query, {
-                searchEngine: QueryType.YOUTUBE_SEARCH,
-                nodeOptions: {
-                    metadata: interaction
-                }
+            await distube.play(voiceChannel, query, {
+                member: member,
+                textChannel: interaction.channel
             });
-
-            console.log(`[Play Command] Result found: ${res.track.title} (${res.track.url})`);
-            console.log(`[Play Command] Queue connection: ${res.queue.connection ? 'Active' : 'Inactive'}`);
-
-            const embed = new EmbedBuilder()
-                .setTitle('🎶 Added to Queue')
-                .setDescription(`**${res.track.title}** has been added to the queue.`)
-                .setThumbnail(res.track.thumbnail)
-                .setColor('#00ff00');
-
-            return interaction.editReply({ embeds: [embed] });
         } catch (e) {
             console.error('[Play Command Error]', e);
-            return interaction.editReply(`No results found for **${query}**!`);
+            return interaction.editReply({ content: `❌ Error: ${e}` });
         }
     },
 };

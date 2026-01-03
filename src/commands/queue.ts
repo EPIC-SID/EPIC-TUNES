@@ -1,25 +1,38 @@
 import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
-import { useQueue } from 'discord-player';
+import { distube } from '../client.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('queue')
         .setDescription('Shows the current music queue'),
     async execute(interaction: any) {
-        const queue = useQueue(interaction.guildId!);
+        const queue = distube.getQueue(interaction.guildId!); 
 
-        if (!queue || !queue.tracks.size) {
+        if (!queue) {
             return interaction.reply({ content: 'The queue is currently empty!', ephemeral: true });
         }
 
-        const currentTrack = queue.currentTrack;
-        const tracks = queue.tracks.toArray().slice(0, 10).map((track, i) => {
-            return `${i + 1}. **${track.title}** - ${track.author}`;
+        const currentSong = queue.songs[0];
+        // queue.songs includes the current song at index 0
+        const tracks = queue.songs.slice(1, 11).map((song, i) => {
+            return (i + 1) + '. **' + song.name + '** - `' + song.formattedDuration + '`';
         });
+
+        let description = '**Now Playing:** ' + currentSong.name + ' - `' + currentSong.formattedDuration + '`\n\n';
+        
+        if (tracks.length > 0) {
+            description += tracks.join('\n');
+        } else {
+            description += 'No upcoming songs.';
+        }
+
+        if (queue.songs.length > 11) {
+            description += '\n...and ' + (queue.songs.length - 11) + ' more';
+        }
 
         const embed = new EmbedBuilder()
             .setTitle('🎶 Current Queue')
-            .setDescription(`**Now Playing:** ${currentTrack?.title}\n\n${tracks.join('\n')}${queue.tracks.size > 10 ? `\n...and ${queue.tracks.size - 10} more` : ''}`)
+            .setDescription(description)
             .setColor('#0099ff');
 
         return interaction.reply({ embeds: [embed] });

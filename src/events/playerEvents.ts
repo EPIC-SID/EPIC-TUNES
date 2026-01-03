@@ -1,29 +1,24 @@
-import { player } from '../client.js';
+import { distube as distubeClient } from '../client.js';
+import { Queue, Song, Playlist } from 'distube';
 
-player.events.on('playerStart', (queue, track) => {
-    const interaction = queue.metadata as any;
-    interaction.channel.send(`🎶 Now playing: **${track.title}**!`);
-});
+const distube = distubeClient as any;
 
-player.events.on('audioTrackAdd', (queue, track) => {
-    // We already send a message in the play command
-});
-
-player.events.on('error', (queue, error) => {
-    console.error(`[General Error] ${error.message}`);
-    console.error(error);
-});
-
-player.events.on('playerError', (queue, error) => {
-    console.error(`[Player Error] ${error.message}`);
-    console.error(error);
-});
-
-player.events.on('debug', (queue, message) => {
-    // Only log important debug messages to avoid console spam
-    console.log(`[Debug] ${message}`);
-});
-
-player.on('debug', (message) => {
-    console.log(`[General Debug] ${message}`);
-});
+distube
+    .on('playSong', (queue: Queue, song: Song) => {
+        queue.textChannel?.send('🎶 Now playing: **' + song.name + '** - `' + song.formattedDuration + '` by ' + song.user);
+    })
+    .on('addSong', (queue: Queue, song: Song) => {
+        queue.textChannel?.send('✅ Added **' + song.name + '** - `' + song.formattedDuration + '` to the queue by ' + song.user);
+    })
+    .on('addList', (queue: Queue, playlist: Playlist) => {
+        queue.textChannel?.send('✅ Added playlist **' + playlist.name + '** (' + playlist.songs.length + ' songs) to the queue by ' + playlist.user);
+    })
+    .on('error', (channel: any, e: any) => {
+        if (channel && typeof channel.send === 'function') {
+            channel.send('❌ An error encountered: ' + e.toString().slice(0, 1974));
+        }
+        console.error(e);
+    })
+    .on('finish', (queue: Queue) => {
+        queue.textChannel?.send('🏁 Queue finished!');
+    });
