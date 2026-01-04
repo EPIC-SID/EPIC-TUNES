@@ -63,7 +63,7 @@ client.on('ready', async () => {
 ╚══════╝╚═╝     ╚═╝ ╚═════╝    ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝╚══════╝     ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝    ╚═╝╚═╝
                                                                                                                                                    
 `);
-    console.log(`EPIC MUSIC IS ONLINE !!`);
+    console.log(`${client.user?.username} is Online`);
 
     const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
 
