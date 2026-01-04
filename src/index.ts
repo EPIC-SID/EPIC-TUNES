@@ -3,8 +3,13 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+<<<<<<< HEAD
 import { Collection, Events } from 'discord.js'; // Added Events
 import http from 'http'; // For UptimeRobot
+=======
+import { Collection } from 'discord.js';
+import http from 'http';
+>>>>>>> temp
 
 dotenv.config();
 
@@ -42,6 +47,9 @@ for (const file of commandFiles) {
         (client as any).commands.set(command.default.data.name, command.default);
     }
 }
+console.log(`${commandFiles.length} Slash Commands Loaded`);
+console.log(`${commandFiles.length} Message Commands Loaded`);
+console.log(`4 Events Loaded`);
 
 // Event handler for slash commands
 client.on(Events.InteractionCreate, async interaction => { // Updated to Events.InteractionCreate
@@ -63,12 +71,31 @@ client.on(Events.InteractionCreate, async interaction => { // Updated to Events.
     }
 });
 
+<<<<<<< HEAD
 client.once(Events.ClientReady, async () => { // Updated to Events.ClientReady and once
     console.log(`🚀 Bot is online as ${client.user?.tag}!`);
+=======
+client.on('ready', async () => {
+    console.log(`
+███████╗██████╗ ██╗ ██████╗    ███╗   ███╗██╗   ██╗███████╗██╗ ██████╗    ██╗███████╗     ██████╗ ███╗   ██╗██╗     ██╗███╗   ██╗███████╗    ██╗██╗
+██╔════╝██╔══██╗██║██╔════╝    ████╗ ████║██║   ██║██╔════╝██║██╔════╝    ██║██╔════╝    ██╔═══██╗████╗  ██║██║     ██║████╗  ██║██╔════╝    ██║██║
+█████╗  ██████╔╝██║██║         ██╔████╔██║██║   ██║███████╗██║██║         ██║███████╗    ██║   ██║██╔██╗ ██║██║     ██║██╔██╗ ██║█████╗      ██║██║
+██╔══╝  ██╔═══╝ ██║██║         ██║╚██╔╝██║██║   ██║╚════██║██║██║         ██║╚════██║    ██║   ██║██║╚██╗██║██║     ██║██║╚██╗██║██╔══╝      ╚═╝╚═╝
+███████╗██║     ██║╚██████╗    ██║ ╚═╝ ██║╚██████╔╝███████║██║╚██████╗    ██║███████║    ╚██████╔╝██║ ╚████║███████╗██║██║ ╚████║███████╗    ██╗██╗
+╚══════╝╚═╝     ╚═╝ ╚═════╝    ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝╚══════╝     ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝    ╚═╝╚═╝
+                                                                                                                                                   
+`);
+    console.log(`${client.user?.username} is Online`);
+>>>>>>> temp
 
     const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
 
     try {
+<<<<<<< HEAD
+=======
+        console.log('Started refreshing guild (/) commands.');
+
+>>>>>>> temp
         // Register Globally (Primary)
         await client.application?.commands.set(commandData);
 
@@ -81,17 +108,24 @@ client.once(Events.ClientReady, async () => { // Updated to Events.ClientReady a
                 // Ignore per-guild errors silently or log if critical
             }
         }
+<<<<<<< HEAD
         // Silent success
+=======
+
+        console.log('Successfully reloaded guild (/) commands.');
+>>>>>>> temp
     } catch (error) {
         console.error(error);
     }
 });
 
+import { ConfigManager } from './utils/configManager.js';
+
 // Legacy Text Command Handler (Shim)
 client.on('messageCreate', async (message) => {
     if (message.author.bot || !message.guild) return;
 
-    const PREFIX = process.env.PREFIX || '?';
+    const PREFIX = ConfigManager.getPrefix(message.guildId || '');
     if (!message.content.startsWith(PREFIX)) return;
 
     const args = message.content.slice(PREFIX.length).trim().split(/ +/);
@@ -175,3 +209,11 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('Bot is active!');
+});
+server.listen(3000, () => {
+    console.log('Listening at http://localhost:3000');
+});
