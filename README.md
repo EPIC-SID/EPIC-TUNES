@@ -1,9 +1,5 @@
 # EPIC TUNES
 
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![Discord.js](https://img.shields.io/badge/Discord.js-5865F2?style=for-the-badge&logo=discord&logoColor=white)
-![DisTube](https://img.shields.io/badge/DisTube-FE2C55?style=for-the-badge&logo=youtube&logoColor=white)
-
 **EPIC TUNES** is a high-performance, feature-rich Discord music bot designed for seamless audio experiences. Built with modern web technologies, it features a professional **Interactive Dashboard**, 24/7 uptime capability, and a sleek user interface.
 
 ---
