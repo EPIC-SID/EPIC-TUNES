@@ -16,7 +16,7 @@
   - `Info System`: Bot statistics and support.
   - `Settings`: Configure per-server settings.
 
-- **🛠️ Advanced Audio Filters**:  
+- **Advanced Audio Filters**:  
   Apply real-time effects like `Bassboost`, `Nightcore`, `Vaporwave`, `3D`, and more.
 
 - **Custom Configuration**:  
