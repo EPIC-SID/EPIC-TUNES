@@ -3,9 +3,21 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { Collection } from 'discord.js';
+import { Collection, Events } from 'discord.js'; // Added Events
+import http from 'http'; // For UptimeRobot
 
 dotenv.config();
+
+// -- UPTIMEROBOT KEEP-ALIVE SYSTEM --
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.write("Bot is Alive! 🤖");
+    res.end();
+}).listen(PORT, () => {
+    console.log(`[Health-Check] Server running on port ${PORT}`);
+});
+// ------------------------------------
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,12 +40,11 @@ for (const file of commandFiles) {
     const command = await import(`file://${filePath}`);
     if ('data' in command.default && 'execute' in command.default) {
         (client as any).commands.set(command.default.data.name, command.default);
-        console.log(`Loaded command: ${command.default.data.name}`);
     }
 }
 
 // Event handler for slash commands
-client.on('interactionCreate', async interaction => {
+client.on(Events.InteractionCreate, async interaction => { // Updated to Events.InteractionCreate
     if (!interaction.isChatInputCommand()) return;
 
     const command = (client as any).commands.get(interaction.commandName);
@@ -52,14 +63,12 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.on('ready', async () => {
+client.once(Events.ClientReady, async () => { // Updated to Events.ClientReady and once
     console.log(`🚀 Bot is online as ${client.user?.tag}!`);
 
     const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
 
     try {
-        console.log('Started refreshing application (/) commands.');
-
         // Register Globally (Primary)
         await client.application?.commands.set(commandData);
 
@@ -68,13 +77,11 @@ client.on('ready', async () => {
         for (const [id, guild] of guilds) {
             try {
                 await guild.commands.set([]); // Clear guild commands
-                console.log(`Cleared guild-specific commands in: ${guild.name} (${id})`);
             } catch (error) {
-                console.error(`Failed to clear guild commands in ${guild.name}:`, error);
+                // Ignore per-guild errors silently or log if critical
             }
         }
-
-        console.log('Successfully reloaded application (/) commands globally and cleaned up guild duplicates.');
+        // Silent success
     } catch (error) {
         console.error(error);
     }

@@ -51,7 +51,7 @@ const createMusicComponents = (queue: Queue) => {
 
 distube
     .on('playSong', (queue: Queue, song: Song) => {
-        console.log('[Event] playSong triggered');
+
 
         // Status String for Footer
         const loopStatus = queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'Off';
@@ -78,7 +78,6 @@ distube
         });
     })
     .on('addSong', (queue: Queue, song: Song) => {
-        console.log('[Event] addSong triggered');
         const embed = new EmbedBuilder()
             .setColor('#2ECC71') // Green for success
             .setDescription(`⊕ Added **[${song.name}](${song.url})** • ${song.formattedDuration} To Queue`);
@@ -86,7 +85,6 @@ distube
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('addList', (queue: Queue, playlist: Playlist) => {
-        console.log('[Event] addList triggered');
         const embed = new EmbedBuilder()
             .setColor('#2ECC71') // Green for success
             .setTitle('✅ Playlist Added')
@@ -98,7 +96,6 @@ distube
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('error', (channel: any, e: any) => {
-        console.log('[Event] error triggered');
         if (channel && typeof channel.send === 'function') {
             const embed = new EmbedBuilder()
                 .setColor('#FF0000') // Red
@@ -109,32 +106,29 @@ distube
         console.error('[DisTube Error]', e);
     })
     .on('finish', (queue: Queue) => {
-        console.log('[Event] finish triggered');
         const embed = new EmbedBuilder()
             .setColor('#3498DB') // Blue
             .setDescription('🏁 **Queue finished!**');
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('disconnect', (queue: Queue) => {
-        console.log('[Event] disconnect triggered');
         const embed = new EmbedBuilder()
             .setColor('#E74C3C') // Red
             .setDescription('🔌 **Disconnected!**');
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('empty', (queue: Queue) => {
-        console.log('[Event] empty triggered');
         const embed = new EmbedBuilder()
             .setColor('#2B2D31') // Dark Grey
             .setDescription('👻 **Channel is empty. Leaving...**');
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('initQueue', (queue: Queue) => {
-        console.log('[Event] initQueue triggered');
+        // Init queue
     })
     .on('debug', (message: string) => {
-        console.log('[DisTube Debug]', message);
+        // Debug
     })
     .on('ffmpegDebug', (text: string) => {
-        console.log('[FFmpeg Debug]', text);
+        // FFmpeg Debug
     });
