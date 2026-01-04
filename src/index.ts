@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { Collection } from 'discord.js';
+import http from 'http';
 
 dotenv.config();
 
@@ -26,9 +27,11 @@ for (const file of commandFiles) {
     const command = await import(`file://${filePath}`);
     if ('data' in command.default && 'execute' in command.default) {
         (client as any).commands.set(command.default.data.name, command.default);
-        console.log(`Loaded command: ${command.default.data.name}`);
     }
 }
+console.log(`${commandFiles.length} Slash Commands Loaded`);
+console.log(`${commandFiles.length} Message Commands Loaded`);
+console.log(`4 Events Loaded`);
 
 // Event handler for slash commands
 client.on('interactionCreate', async interaction => {
@@ -51,12 +54,21 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('ready', async () => {
-    console.log(`🚀 Bot is online as ${client.user?.tag}!`);
+    console.log(`
+███████╗██████╗ ██╗ ██████╗    ███╗   ███╗██╗   ██╗███████╗██╗ ██████╗    ██╗███████╗     ██████╗ ███╗   ██╗██╗     ██╗███╗   ██╗███████╗    ██╗██╗
+██╔════╝██╔══██╗██║██╔════╝    ████╗ ████║██║   ██║██╔════╝██║██╔════╝    ██║██╔════╝    ██╔═══██╗████╗  ██║██║     ██║████╗  ██║██╔════╝    ██║██║
+█████╗  ██████╔╝██║██║         ██╔████╔██║██║   ██║███████╗██║██║         ██║███████╗    ██║   ██║██╔██╗ ██║██║     ██║██╔██╗ ██║█████╗      ██║██║
+██╔══╝  ██╔═══╝ ██║██║         ██║╚██╔╝██║██║   ██║╚════██║██║██║         ██║╚════██║    ██║   ██║██║╚██╗██║██║     ██║██║╚██╗██║██╔══╝      ╚═╝╚═╝
+███████╗██║     ██║╚██████╗    ██║ ╚═╝ ██║╚██████╔╝███████║██║╚██████╗    ██║███████║    ╚██████╔╝██║ ╚████║███████╗██║██║ ╚████║███████╗    ██╗██╗
+╚══════╝╚═╝     ╚═╝ ╚═════╝    ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝╚══════╝     ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝    ╚═╝╚═╝
+                                                                                                                                                   
+`);
+    console.log(`EPIC MUSIC IS ONLINE !!`);
 
     const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
 
     try {
-        console.log('Started refreshing application (/) commands.');
+        console.log('Started refreshing guild (/) commands.');
 
         // Register Globally (Primary)
         await client.application?.commands.set(commandData);
@@ -72,7 +84,7 @@ client.on('ready', async () => {
             }
         }
 
-        console.log('Successfully reloaded application (/) commands globally and cleaned up guild duplicates.');
+        console.log('Successfully reloaded guild (/) commands.');
     } catch (error) {
         console.error(error);
     }
@@ -158,3 +170,11 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('Bot is active!');
+});
+server.listen(3000, () => {
+    console.log('Listening at http://localhost:3000');
+});
