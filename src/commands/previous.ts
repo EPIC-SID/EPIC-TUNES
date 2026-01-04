@@ -13,7 +13,7 @@ export default {
             await queue.previous();
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
-                .setDescription('**⏮️ Playing previous song...**');
+                .setDescription('**⏮️ Rewinding...**\nPlaying the previous track.');
             return interaction.reply({ embeds: [embed] });
         } catch (e) {
             return interaction.reply({ content: '❌ No previous song detected!', ephemeral: true });

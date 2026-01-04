@@ -23,9 +23,12 @@ export default {
         const active = queue.setRepeatMode(mode);
 
         const modes = ['Off', 'Song', 'Queue'];
+        const icons = ['➡️', '🔂', '🔁'];
+
         const embed = new EmbedBuilder()
             .setColor('#F39C12')
-            .setDescription(`**🔁 Loop Mode set to: ${modes[active]}**`);
+            .setTitle(`Loop Mode: ${modes[active]}`)
+            .setDescription(`**${icons[active]} Repeat mode updated.**`);
 
         return interaction.reply({ embeds: [embed] });
     },

@@ -18,82 +18,111 @@ export default {
         const voiceChannel = member.voice.channel;
 
         if (!voiceChannel) {
-            return interaction.reply({ content: 'You need to be in a voice channel to play music!', ephemeral: true });
+            return interaction.reply({ content: '❌ Connect to a voice channel first!', ephemeral: true });
         }
 
         const searchEmbed = new EmbedBuilder()
             .setColor('#5865F2')
-            .setDescription('**🔍 Searching...**');
+            .setDescription('**🔎 Searching YouTube...**');
         await interaction.reply({ embeds: [searchEmbed], ephemeral: true });
 
         try {
-            // Check if query is a URL
             const isUrl = /^(https?:\/\/)/.test(query);
             const isSpotifyTrack = query.includes('spotify.com/track/');
+            const isYoutubeLink = query.includes('youtube.com') || query.includes('youtu.be');
+
+            let videoTitle = 'Unknown Song';
+            let videoUrl = query;
+            let videoThumb = undefined;
+            let videoDuration = 'Unknown';
 
             if (isSpotifyTrack) {
                 const convertingEmbed = new EmbedBuilder()
                     .setColor('#1DB954')
-                    .setDescription('**🎵 Spotify link detected! Converting to YouTube...**');
+                    .setDescription('**💚 Spotify detected! Importing...**');
                 await interaction.editReply({ embeds: [convertingEmbed] });
 
                 try {
-                    // Fetch Spotify page to get metadata
                     const response = await fetch(query);
                     const text = await response.text();
                     const titleMatch = text.match(/<title>(.*?)<\/title>/);
 
                     if (titleMatch && titleMatch[1]) {
-                        // Title format is usually "Song - Artist | Spotify" or "Song - song by Artist | Spotify"
                         let searchTerm = titleMatch[1].replace(' | Spotify', '').replace(' - song by', ' -').trim();
-
-                        const foundEmbed = new EmbedBuilder()
-                            .setColor('#5865F2')
-                            .setDescription(`**🔍 Found: ${searchTerm}**\nFinding best YouTube match...`);
-                        await interaction.editReply({ embeds: [foundEmbed] });
 
                         const searchResults = await yts(searchTerm);
                         if (searchResults && searchResults.videos.length > 0) {
-                            query = searchResults.videos[0].url;
-                            const playEmbed = new EmbedBuilder()
-                                .setColor('#2ECC71')
-                                .setDescription(`**▶️ Playing: [${searchResults.videos[0].title}](${query})**`)
-                                .setThumbnail(searchResults.videos[0].thumbnail);
-                            await interaction.editReply({ embeds: [playEmbed] });
+                            const video = searchResults.videos[0];
+                            query = video.url;
+                            videoTitle = video.title;
+                            videoUrl = video.url;
+                            videoThumb = video.thumbnail;
+                            videoDuration = video.timestamp;
                         } else {
-                            const errorEmbed = new EmbedBuilder()
-                                .setColor('#E74C3C')
-                                .setDescription('**⚠️ Could not find a match on YouTube. Trying original link...**');
-                            await interaction.editReply({ embeds: [errorEmbed] });
+                            throw new Error('No YouTube match found');
                         }
                     }
                 } catch (err) {
-                    console.error('Spotify fetch error:', err);
-                    const errorEmbed = new EmbedBuilder()
-                        .setColor('#E74C3C')
-                        .setDescription('**⚠️ Could not fetch Spotify metadata. Trying original link...**');
-                    await interaction.editReply({ embeds: [errorEmbed] });
+                    console.error('Spotify error:', err);
+                    const errorEmbed = new EmbedBuilder().setColor('#E74C3C').setDescription('❌ Could not resolve Spotify link.');
+                    return interaction.editReply({ embeds: [errorEmbed] });
+                }
+            } else if (isYoutubeLink) {
+                const ytEmbed = new EmbedBuilder()
+                    .setColor('#FF0000') // YouTube Red
+                    .setDescription('**🔴 YouTube link detected! Processing...**');
+                await interaction.editReply({ embeds: [ytEmbed] });
+
+                try {
+                    // yt-search usually handles URLs if parsed as a search or by videoId. 
+                    // To be safe, let's just use the URL as the query for yts, it often finds it.
+                    // Or extract ID. simple query usually works for yts.
+                    const searchResults = await yts(query);
+                    if (searchResults && (searchResults.videos.length > 0 || (searchResults as any).title)) {
+                        // yts result structure varies for single video vs list
+                        const video = searchResults.videos.length > 0 ? searchResults.videos[0] : (searchResults as any);
+                        videoTitle = video.title;
+                        videoUrl = video.url;
+                        videoThumb = video.thumbnail;
+                        videoDuration = video.timestamp;
+                    }
+                } catch (err) {
+                    // Fallback to playing URL blindly if metadata fetch fails
+                    console.log('Metadata fetch failed, playing URL directly');
                 }
             } else if (!isUrl) {
                 const searchResults = await yts(query);
                 if (!searchResults || !searchResults.videos.length) {
-                    const errorEmbed = new EmbedBuilder()
-                        .setColor('#E74C3C')
-                        .setDescription('**❌ No results found on YouTube.**');
+                    const errorEmbed = new EmbedBuilder().setColor('#E74C3C').setDescription('❌ No results found.');
                     return interaction.editReply({ embeds: [errorEmbed] });
                 }
-                // Update query to the URL of the first result
-                query = searchResults.videos[0].url;
-                const foundEmbed = new EmbedBuilder()
-                    .setColor('#5865F2')
-                    .setDescription(`**🔍 Found: [${searchResults.videos[0].title}](${query})**\nAdding to queue...`)
-                    .setThumbnail(searchResults.videos[0].thumbnail);
-                await interaction.editReply({ embeds: [foundEmbed] });
+                const video = searchResults.videos[0];
+                query = video.url;
+                videoTitle = video.title;
+                videoUrl = video.url;
+                videoThumb = video.thumbnail;
+                videoDuration = video.timestamp;
             } else {
-                const urlEmbed = new EmbedBuilder()
-                    .setColor('#5865F2')
-                    .setDescription('**🔍 URL detected, adding to queue...**');
+                // Direct URL (YouTube, etc.) - we can't easily get metadata before playing without ytdl-core directly or just letting distube handle it.
+                // However, users usually want immediate feedback.
+                // We'll rely on DisTube events for the "Now Playing" usually, but here we want an "Added" message.
+                // For direct URLs, we might just say "Added URL".
+                const urlEmbed = new EmbedBuilder().setColor('#5865F2').setDescription('**🔗 Link detected! Processing...**');
                 await interaction.editReply({ embeds: [urlEmbed] });
+            }
+
+            // Only show the rich embed if we have metadata
+            if (videoTitle !== 'Unknown Song') {
+                const resultEmbed = new EmbedBuilder()
+                    .setColor('#5865F2')
+                    .setTitle('💿 Added to Queue')
+                    .setDescription(`**[${videoTitle}](${videoUrl})**`)
+                    .setThumbnail(videoThumb || null)
+                    .addFields(
+                        { name: 'Duration', value: `\`${videoDuration}\``, inline: true },
+                        { name: 'Requested By', value: `${member.user}`, inline: true }
+                    );
+                await interaction.editReply({ embeds: [resultEmbed] });
             }
 
             await distube.play(voiceChannel, query, {

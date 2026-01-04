@@ -46,7 +46,8 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#E91E63')
-            .setDescription(`**🎛️ Filter applied: ${filter}**`);
+            .setTitle('🎛️ Audio Filter Applied')
+            .setDescription(`**Mode selected:** \`${filter.toUpperCase()}\`\n*Enhancing audio stream...*`);
 
         return interaction.reply({ embeds: [embed] });
     },

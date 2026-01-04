@@ -19,7 +19,7 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#5865F2')
-            .setDescription(`**⏩ Seeked to ${time} seconds!**`);
+            .setDescription(`**⏩ Creating time warp...**\nJumped to \`${time}s\`.`);
 
         return interaction.reply({ embeds: [embed] });
     },

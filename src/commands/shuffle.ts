@@ -13,7 +13,8 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#9B59B6')
-            .setDescription('**🔀 Queue shuffled!**');
+            .setTitle('🔀 Shuffled!')
+            .setDescription('**The queue has been randomized.**\nLet\'s see what plays next!');
 
         return interaction.reply({ embeds: [embed] });
     },

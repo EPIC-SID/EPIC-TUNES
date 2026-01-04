@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, GuildMember } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
 import { distube } from '../client.js';
 
 export default {
@@ -7,23 +7,25 @@ export default {
         .setDescription('Skips the current song'),
     async execute(interaction: any) {
         const member = interaction.member as GuildMember;
-        
+
         if (!member.voice.channel) {
             return interaction.reply({ content: 'You need to be in a voice channel!', ephemeral: true });
         }
 
         const queue = distube.getQueue(interaction.guildId!);
-
-        if (!queue) {
-            return interaction.reply({ content: 'There is no music playing!', ephemeral: true });
-        }
+        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
 
         try {
-            await distube.skip(interaction.guildId!);
-            return interaction.reply('⏩ Skipped the current song!');
+            const song = await queue.skip();
+            const embed = new EmbedBuilder()
+                .setColor('#5865F2')
+                .setDescription(`**⏭️ Skipped!**\nNow playing: **${song.name}**`);
+            return interaction.reply({ embeds: [embed] });
         } catch (e) {
-            // Usually throws if there is no up next song
-            return interaction.reply({ content: '❌ No more songs to skip to (or error)!', ephemeral: true });
+            const embed = new EmbedBuilder()
+                .setColor('#E74C3C')
+                .setDescription('**⚠️ Last song in queue.**\nType `/stop` to end or add more songs.');
+            return interaction.reply({ embeds: [embed] });
         }
     },
 };

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
 
 export default {
@@ -12,14 +12,19 @@ export default {
                 .setMinValue(0)
                 .setMaxValue(100)),
     async execute(interaction: any) {
+        const queue = distube.getQueue(interaction.guildId!);
+        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
+
         const volume = interaction.options.getInteger('level');
-        const queue = distube.getQueue(interaction.guildId);
-        if (!queue) {
-            return interaction.reply({ content: '❌ There is nothing playing right now!', ephemeral: true });
-        }
+
         try {
             queue.setVolume(volume);
-            await interaction.reply(`🔊 Volume set to **${volume}%**`);
+
+            const embed = new EmbedBuilder()
+                .setColor('#3498DB')
+                .setDescription(`**🔊 Volume set to ${volume}%**`);
+
+            return interaction.reply({ embeds: [embed] });
         } catch (e) {
             console.error(e);
             await interaction.reply({ content: `❌ Error: ${e}`, ephemeral: true });

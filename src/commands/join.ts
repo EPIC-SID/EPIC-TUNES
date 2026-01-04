@@ -13,7 +13,7 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#2ECC71')
-            .setDescription(`**🔊 Joined ${voiceChannel}!**`);
+            .setDescription(`**👋 Connected to ${voiceChannel}!**\nReference for high-quality audio.`);
 
         return interaction.reply({ embeds: [embed] });
     },

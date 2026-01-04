@@ -10,7 +10,7 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#E74C3C')
-            .setDescription('**👋 Disconnected.**');
+            .setDescription('**👋 Disconnected.**\nThanks for vibing! See you soon.');
 
         return interaction.reply({ embeds: [embed] });
     },

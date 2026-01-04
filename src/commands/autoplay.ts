@@ -13,7 +13,8 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor('#3498DB')
-            .setDescription(`**♾️ Autoplay is now: ${autoplay ? 'On' : 'Off'}**`);
+            .setTitle(autoplay ? '♾️ Autoplay Enabled' : '⏸️ Autoplay Disabled')
+            .setDescription(autoplay ? '**I\'ll keep the party going endlessly!** 🚀' : '**Autoplay has been turned off.**');
 
         return interaction.reply({ embeds: [embed] });
     },
