@@ -34,7 +34,7 @@ export default {
             .addFields(
                 {
                     name: '🎧 Music Controls',
-                    value: '`/play`, `/pause`, `/resume`, `/stop`, `/skip`, `/previous`, `/seek`, `/autoplay`, `/loop`, `/shuffle`, `/filter`, `/nowplaying`, `/queue`',
+                    value: '`/play`, `/pause`, `/resume`, `/stop`, `/skip`, `/remove`, `/previous`, `/seek`, `/autoplay`, `/loop`, `/shuffle`, `/filter`, `/nowplaying`, `/queue`',
                     inline: false
                 },
                 {
@@ -56,8 +56,8 @@ export default {
             .setTitle('🎹 Music Command Center')
             .setDescription('**Control the rhythm.** Use these commands to manage your listening session.')
             .addFields(
-                { name: '▶️ Playback', value: '`/play`, `/pause`, `/resume`, `/stop`, `/skip`, `/previous`, `/seek`, `/autoplay`, `/loop`', inline: false },
-                { name: '🎶 Queue Management', value: '`/queue`, `/nowplaying`, `/shuffle`', inline: false },
+                { name: '▶️ Playback', value: '`/play`, `/search`, `/pause`, `/resume`, `/stop`, `/skip`, `/previous`, `/seek`, `/autoplay`, `/loop`', inline: false },
+                { name: '🎶 Queue Management', value: '`/queue`, `/remove`, `/nowplaying`, `/shuffle`', inline: false },
                 { name: '🎛️ Audio Effects', value: '`/filter` (Bassboost, Nightcore, 8D, Vaporwave...)', inline: false }
             )
             .setThumbnail(client.user.displayAvatarURL())
