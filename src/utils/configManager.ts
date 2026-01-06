@@ -5,6 +5,8 @@ interface GuildConfig {
     prefix?: string;
     djRole?: string;
     is247?: boolean;
+    setupChannelId?: string;
+    setupMessageId?: string;
 }
 
 interface ConfigData {
@@ -69,6 +71,28 @@ export class ConfigManager {
     static set247(guildId: string, is247: boolean) {
         if (!this.data[guildId]) this.data[guildId] = {};
         this.data[guildId].is247 = is247;
+        this.save();
+    }
+
+    static getSetupChannelId(guildId: string): string | null {
+        if (!this.data[guildId]) return null;
+        return this.data[guildId].setupChannelId || null;
+    }
+
+    static setSetupChannelId(guildId: string, channelId: string | null) {
+        if (!this.data[guildId]) this.data[guildId] = {};
+        this.data[guildId].setupChannelId = channelId || undefined;
+        this.save();
+    }
+
+    static getSetupMessageId(guildId: string): string | null {
+        if (!this.data[guildId]) return null;
+        return this.data[guildId].setupMessageId || null;
+    }
+
+    static setSetupMessageId(guildId: string, messageId: string | null) {
+        if (!this.data[guildId]) this.data[guildId] = {};
+        this.data[guildId].setupMessageId = messageId || undefined;
         this.save();
     }
 }

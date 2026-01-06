@@ -1,7 +1,8 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { client, distube as distubeClient } from '../client.js';
 import { Queue, Song, Playlist } from 'distube';
 import { ConfigManager } from '../utils/configManager.js';
+import { createMusicComponents, updateSetupMessage, resetSetupMessage } from '../utils/musicUtils.js';
 
 const distube = distubeClient as any;
 
@@ -9,49 +10,8 @@ const status = (queue: Queue) =>
     `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
     }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
 
-// Helper to create components (Buttons + Select Menu)
-const createMusicComponents = (queue: Queue) => {
-    // Select Menu for Filters
-    const filterRow = new ActionRowBuilder<StringSelectMenuBuilder>()
-        .addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId('music_filter')
-                .setPlaceholder('Click Here To Apply Filters')
-                .addOptions([
-                    { label: 'Off', value: 'off', description: 'Disable all filters' },
-                    { label: '3D', value: '3d', description: 'Apply 3D effect' },
-                    { label: 'Bassboost', value: 'bassboost', description: 'Boost the bass' },
-                    { label: 'Echo', value: 'echo', description: 'Add echo effect' },
-                    { label: 'Karaoke', value: 'karaoke', description: 'Karaoke mode' },
-                    { label: 'Nightcore', value: 'nightcore', description: 'Speed up and pitch up' },
-                    { label: 'Vaporwave', value: 'vaporwave', description: 'Slow down and pitch down' },
-                ])
-        );
-
-    // Button Rows
-    const row1 = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-            new ButtonBuilder().setCustomId('music_back').setEmoji('⏮').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_loop').setEmoji('🔁').setStyle(queue.repeatMode > 0 ? ButtonStyle.Success : ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_pause').setEmoji(queue.paused ? '▶' : '⏸').setStyle(queue.paused ? ButtonStyle.Success : ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_shuffle').setEmoji('🔀').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_next').setEmoji('⏭').setStyle(ButtonStyle.Secondary)
-        );
-
-    const row2 = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-            new ButtonBuilder().setCustomId('music_vol_down').setEmoji('🔉').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_queue').setEmoji('📑').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_stop').setEmoji('⏹').setStyle(ButtonStyle.Danger),
-            new ButtonBuilder().setCustomId('music_info').setEmoji('ℹ️').setStyle(ButtonStyle.Secondary), // Added Info button to match 10-button layout
-            new ButtonBuilder().setCustomId('music_vol_up').setEmoji('🔊').setStyle(ButtonStyle.Secondary)
-        );
-
-    return [filterRow, row1, row2];
-};
-
 distube
-    .on('playSong', (queue: Queue, song: Song) => {
+    .on('playSong', async (queue: Queue, song: Song) => {
         // Update Bot Status
         client.user?.setActivity({
             name: song.name?.substring(0, 120) || 'Music',
@@ -84,8 +44,18 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
                 { name: '👀 Views', value: `\`${(song as any).views?.toLocaleString() || '0'}\``, inline: true },
                 { name: '👍 Likes', value: `\`${(song as any).likes?.toLocaleString() || '0'}\``, inline: true }
             )
-            .setThumbnail(song.thumbnail || null)
+            .setImage(song.thumbnail || null) // Use big image for setup
             .setFooter({ text: statusString, iconURL: userIcon || undefined });
+
+        // -- SETUP CHANNEL SYNC --
+        // Use the shared utility to sync
+        updateSetupMessage(queue);
+        // ------------------------
+
+        // If playing in setup channel, we don't send a separate message
+        if (queue.textChannel?.id === ConfigManager.getSetupChannelId(queue.textChannel?.guild.id || '')) {
+            return;
+        }
 
         queue.textChannel?.send({
             embeds: [embed],
@@ -93,22 +63,46 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
         });
     })
     .on('addSong', (queue: Queue, song: Song) => {
-        const embed = new EmbedBuilder()
-            .setColor('#2ECC71') // Green for success
-            .setDescription(`⊕ Added **[${song.name}](${song.url})** • ${song.formattedDuration} To Queue`);
+        // Sync setup message (Queue count update)
+        updateSetupMessage(queue);
 
-        queue.textChannel?.send({ embeds: [embed] });
+        // Optional: Send ephemeral or temporary message in setup channel?
+        // User asked for "sync", implies he wants the number to go up.
+        // We probably don't want to spam the channel if it IS the setup channel.
+        if (queue.textChannel?.id === ConfigManager.getSetupChannelId(queue.textChannel?.guild.id || '')) {
+            // In setup channel, just sync the message (done above) and maybe delete user message (already handled in messageCreate)
+            // We can send a temp "Added to queue" message if verified
+            const embed = new EmbedBuilder()
+                .setColor('#2ECC71')
+                .setDescription(`⊕ Added **[${song.name}](${song.url})** to Queue`);
+            queue.textChannel?.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => { }), 3000));
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor('#2ECC71')
+                .setDescription(`⊕ Added **[${song.name}](${song.url})** • ${song.formattedDuration} To Queue`);
+            queue.textChannel?.send({ embeds: [embed] });
+        }
     })
     .on('addList', (queue: Queue, playlist: Playlist) => {
-        const embed = new EmbedBuilder()
-            .setColor('#2ECC71') // Green for success
-            .setTitle('✅ Playlist Added')
-            .setDescription(`**[${playlist.name}](${playlist.url})**`)
-            .addFields(
-                { name: 'Songs', value: `\`${playlist.songs.length}\``, inline: true },
-                { name: 'Requested By', value: `${playlist.user}`, inline: true }
-            );
-        queue.textChannel?.send({ embeds: [embed] });
+        // Sync setup message
+        updateSetupMessage(queue);
+
+        if (queue.textChannel?.id === ConfigManager.getSetupChannelId(queue.textChannel?.guild.id || '')) {
+            const embed = new EmbedBuilder()
+                .setColor('#2ECC71')
+                .setDescription(`✅ Playlist **[${playlist.name}](${playlist.url})** added (${playlist.songs.length} songs)`);
+            queue.textChannel?.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => { }), 3000));
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor('#2ECC71') // Green for success
+                .setTitle('✅ Playlist Added')
+                .setDescription(`**[${playlist.name}](${playlist.url})**`)
+                .addFields(
+                    { name: 'Songs', value: `\`${playlist.songs.length}\``, inline: true },
+                    { name: 'Requested By', value: `${playlist.user}`, inline: true }
+                );
+            queue.textChannel?.send({ embeds: [embed] });
+        }
     })
     .on('error', (error: any, queue: Queue) => {
         if (queue && queue.textChannel) {
@@ -120,9 +114,15 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
         }
         console.error('[DisTube Error]', error);
     })
-    .on('finish', (queue: Queue) => {
+    .on('finish', async (queue: Queue) => {
         client.user?.setActivity({ name: 'Music 🎶', type: 2 }); // Reset status
         const is247 = ConfigManager.get247(queue.textChannel?.guild.id || '');
+        const guildId = queue.textChannel?.guild.id;
+
+        // Reset Setup Message
+        if (guildId) {
+            resetSetupMessage(guildId);
+        }
 
         const embed = new EmbedBuilder()
             .setColor('#3498DB') // Blue
@@ -136,8 +136,14 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
 
         queue.textChannel?.send({ embeds: [embed] });
     })
-    .on('disconnect', (queue: Queue) => {
+    .on('disconnect', async (queue: Queue) => {
         client.user?.setActivity({ name: 'Music 🎶', type: 2 }); // Reset status
+
+        const guildId = queue.textChannel?.guild.id;
+        if (guildId) {
+            resetSetupMessage(guildId);
+        }
+
         const embed = new EmbedBuilder()
             .setColor('#E74C3C') // Red
             .setDescription('🔌 **Disconnected!**');
@@ -156,6 +162,13 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
                 .setColor('#2B2D31') // Dark Grey
                 .setDescription('👻 **Channel is empty. Leaving...**');
             queue.textChannel?.send({ embeds: [embed] });
+
+            // Reset setup message if leaving
+            const guildId = queue.textChannel?.guild.id;
+            if (guildId) {
+                resetSetupMessage(guildId);
+            }
+
             queue.voice.leave();
         }
     })

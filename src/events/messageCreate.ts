@@ -1,10 +1,59 @@
 import { Events, Message } from 'discord.js';
-import { client } from '../client.js';
+import { client, distube } from '../client.js';
 import { ConfigManager } from '../utils/configManager.js';
+// @ts-ignore
+import yts from 'yt-search';
 
 // Legacy Text Command Handler (Shim)
 client.on(Events.MessageCreate, async (message: Message) => {
-    if (message.author.bot || !message.guild) return;
+    if (!message.guild) return;
+
+    // -- SETUP CHANNEL LOGIC --
+    const setupChannelId = ConfigManager.getSetupChannelId(message.guild.id);
+    if (setupChannelId && message.channel.id === setupChannelId) {
+        // Delete user message to keep channel clean
+        setTimeout(() => message.delete().catch(() => { }), 1000);
+
+        if (message.author.bot) return;
+
+        const voiceChannel = message.member?.voice?.channel;
+        if (!voiceChannel) {
+            const reply = await (message.channel as any).send(`❌ **${message.author}**, join a voice channel first!`);
+            setTimeout(() => reply.delete().catch(() => { }), 3000);
+            return;
+        }
+
+        try {
+            // Using distube.play directly
+            // We use the setup channel as the text channel for updates
+
+            let query = message.content;
+
+            // Validate if query is a URL
+            const isUrl = /^(https?:\/\/)/.test(query);
+
+            if (!isUrl) {
+                // Use yt-search for names to avoid "NO_RESULT" or flaky default search
+                const searchResults = await yts(query);
+                if (searchResults && searchResults.videos.length > 0) {
+                    query = searchResults.videos[0].url;
+                }
+            }
+
+            await distube.play(voiceChannel, query, {
+                member: message.member,
+                textChannel: message.channel as any
+            });
+        } catch (e) {
+            console.error('Setup Play Error:', e);
+            const reply = await (message.channel as any).send(`❌ Error playing song: ${e instanceof Error ? e.message : 'Unknown error'}`);
+            setTimeout(() => reply.delete().catch(() => { }), 5000);
+        }
+        return;
+    }
+    // -------------------------
+
+    if (message.author.bot) return;
 
     const PREFIX = ConfigManager.getPrefix(message.guildId || '');
     if (!message.content.startsWith(PREFIX)) return;

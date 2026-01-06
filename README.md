@@ -116,6 +116,7 @@ Run multiple instances of the bot (e.g., **EPIC TUNES** and **MFS MUSIC**) from 
 | `/invite` | Get an invite link for the bot. |
 | `/config` | View server configuration. |
 | `/prefix <new>` | Set a custom prefix for this server. |
+| `/setup` | Initialize the **Dedicated Request Channel**. |
 | `/reset` | Reset server settings to default. |
 
 ---

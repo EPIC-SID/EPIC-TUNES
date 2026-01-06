@@ -1,11 +1,12 @@
 import { Events, Interaction } from 'discord.js';
 import { client, distube } from '../client.js';
+import { updateSetupMessage, resetSetupMessage } from '../utils/musicUtils.js';
 
 client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
 
     const customId = interaction.customId;
-    if (!customId.startsWith('music_')) return;
+    if (!customId.startsWith('music_') && !customId.startsWith('setup_')) return;
 
     // Helper to get the queue for the guild
     const queue = distube.getQueue(interaction.guildId!);
@@ -43,7 +44,26 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
             return;
         }
 
-        switch (customId) {
+        // Normalize IDs to share logic
+        // setup_play_pause -> music_pause (or generic toggle)
+        let action = customId;
+        if (customId.startsWith('setup_')) {
+            const suffix = customId.replace('setup_', '');
+            // Map setup suffixes to music actions
+            const map: { [key: string]: string } = {
+                'play_pause': 'music_pause',
+                'stop': 'music_stop',
+                'skip': 'music_next',
+                'loop': 'music_loop',
+                'shuffle': 'music_shuffle',
+                'vol_down': 'music_vol_down',
+                'vol_up': 'music_vol_up',
+                'lyrics': 'music_lyrics'
+            };
+            action = map[suffix] || customId;
+        }
+
+        switch (action) {
             case 'music_back':
                 if (queue.previousSongs.length > 0) {
                     await queue.previous();
@@ -75,6 +95,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
             case 'music_stop':
                 queue.stop();
                 await interaction.reply({ content: '🛑 Stopped music and cleared queue.', ephemeral: true });
+                resetSetupMessage(interaction.guildId!);
                 break;
 
             case 'music_shuffle':
@@ -88,18 +109,28 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
                 queue.setRepeatMode(nextMode);
                 const modeName = nextMode === 0 ? 'Off' : nextMode === 1 ? 'Song' : 'Queue';
                 await interaction.reply({ content: `🔁 Loop mode set to: **${modeName}**`, ephemeral: true });
+                updateSetupMessage(queue);
                 break;
 
             case 'music_vol_down':
                 const volDown = Math.max(0, queue.volume - 10);
                 queue.setVolume(volDown);
                 await interaction.reply({ content: `🔉 Volume decrease to ${volDown}%`, ephemeral: true });
+                updateSetupMessage(queue);
                 break;
 
             case 'music_vol_up':
                 const volUp = Math.min(100, queue.volume + 10);
                 queue.setVolume(volUp);
                 await interaction.reply({ content: `🔊 Volume increased to ${volUp}%`, ephemeral: true });
+                updateSetupMessage(queue);
+                break;
+
+            case 'music_lyrics':
+                // Trigger lyrics command logic manually or just say "Use /lyrics"
+                // For now, let's just guide them to the command as strictly requested, 
+                // or properly implement it. Let's redirect.
+                await interaction.reply({ content: '📜 Use `/lyrics` to view them properly!', ephemeral: true });
                 break;
 
             case 'music_queue':
