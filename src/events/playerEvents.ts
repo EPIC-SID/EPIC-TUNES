@@ -1,6 +1,7 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
 import { client, distube as distubeClient } from '../client.js';
 import { Queue, Song, Playlist } from 'distube';
+import { ConfigManager } from '../utils/configManager.js';
 
 const distube = distubeClient as any;
 
@@ -64,15 +65,25 @@ distube
 
         const userIcon = song.user?.displayAvatarURL() || null;
 
+        // Progress Bar (Static at start)
+        const progressBar = '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+
         const embed = new EmbedBuilder()
             .setColor('#3B82F6') // Premium Blue
-            .setAuthor({ name: 'NOW PLAYING', iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp' }) // Use a disc icon/emoji url
+            .setAuthor({ name: 'NOW PLAYING', iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp' })
             .setTitle(song.name || 'Unknown Title')
             .setURL(song.url || '')
             .setDescription(`
-• **Duration**: ${song.formattedDuration}
-• **Requester**: ${song.user}
+${progressBar} \`[0:00 / ${song.formattedDuration}]\`
+
+**Requested By:** ${song.user}
+**Duration:** \`${song.formattedDuration}\`
             `)
+            .addFields(
+                { name: '👤 Uploader', value: `\`${song.uploader.name}\``, inline: true },
+                { name: '👀 Views', value: `\`${song.views.toLocaleString()}\``, inline: true },
+                { name: '👍 Likes', value: `\`${song.likes.toLocaleString()}\``, inline: true }
+            )
             .setThumbnail(song.thumbnail || null)
             .setFooter({ text: statusString, iconURL: userIcon || undefined });
 
@@ -111,9 +122,18 @@ distube
     })
     .on('finish', (queue: Queue) => {
         client.user?.setActivity({ name: 'Music 🎶', type: 2 }); // Reset status
+        const is247 = ConfigManager.get247(queue.textChannel?.guild.id || '');
+
         const embed = new EmbedBuilder()
             .setColor('#3498DB') // Blue
             .setDescription('🏁 **Queue finished!**');
+
+        if (is247) {
+            embed.setDescription('🏁 **Queue finished!** (24/7 Mode Active - Staying in VC)');
+        } else {
+            queue.voice.leave();
+        }
+
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('disconnect', (queue: Queue) => {
@@ -124,10 +144,20 @@ distube
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('empty', (queue: Queue) => {
-        const embed = new EmbedBuilder()
-            .setColor('#2B2D31') // Dark Grey
-            .setDescription('👻 **Channel is empty. Leaving...**');
-        queue.textChannel?.send({ embeds: [embed] });
+        const is247 = ConfigManager.get247(queue.textChannel?.guild.id || '');
+
+        if (is247) {
+            const embed = new EmbedBuilder()
+                .setColor('#2ECC71')
+                .setDescription('👻 **Channel is empty, but 24/7 mode is ON. Staying...**');
+            queue.textChannel?.send({ embeds: [embed] });
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor('#2B2D31') // Dark Grey
+                .setDescription('👻 **Channel is empty. Leaving...**');
+            queue.textChannel?.send({ embeds: [embed] });
+            queue.voice.leave();
+        }
     })
     .on('initQueue', (queue: Queue) => {
         // Init queue

@@ -3,6 +3,8 @@ import * as path from 'path';
 
 interface GuildConfig {
     prefix?: string;
+    djRole?: string;
+    is247?: boolean;
 }
 
 interface ConfigData {
@@ -45,6 +47,28 @@ export class ConfigManager {
     static setPrefix(guildId: string, prefix: string) {
         if (!this.data[guildId]) this.data[guildId] = {};
         this.data[guildId].prefix = prefix;
+        this.save();
+    }
+
+    static getDJRole(guildId: string): string | null {
+        if (!this.data[guildId]) return null;
+        return this.data[guildId].djRole || null;
+    }
+
+    static setDJRole(guildId: string, roleId: string | null) {
+        if (!this.data[guildId]) this.data[guildId] = {};
+        this.data[guildId].djRole = roleId || undefined;
+        this.save();
+    }
+
+    static get247(guildId: string): boolean {
+        if (!this.data[guildId]) return false;
+        return !!this.data[guildId].is247;
+    }
+
+    static set247(guildId: string, is247: boolean) {
+        if (!this.data[guildId]) this.data[guildId] = {};
+        this.data[guildId].is247 = is247;
         this.save();
     }
 }
