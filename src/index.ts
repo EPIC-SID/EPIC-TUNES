@@ -24,12 +24,22 @@ if (configArg) {
 
 // -- UPTIMEROBOT KEEP-ALIVE SYSTEM --
 const PORT = process.env.PORT || 3000;
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.write("Bot is Alive! 🤖");
     res.end();
-}).listen(PORT, () => {
+});
+
+server.listen(PORT, () => {
     console.log(`[Health-Check] Server running on port ${PORT}`);
+});
+
+server.on('error', (e: any) => {
+    if (e.code === 'EADDRINUSE') {
+        console.log(`[Health-Check] Port ${PORT} is busy, moving on...`);
+    } else {
+        console.error(`[Health-Check] Server error:`, e);
+    }
 });
 // ------------------------------------
 

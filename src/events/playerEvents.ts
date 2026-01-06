@@ -70,7 +70,7 @@ distube
 
         const embed = new EmbedBuilder()
             .setColor('#3B82F6') // Premium Blue
-            .setAuthor({ name: 'NOW PLAYING', iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp' })
+            .setAuthor({ name: 'NOW PLAYING 🎧', iconURL: 'https://bestanimations.com/media/discs/895872755cd-animated-gif-9.gif' })
             .setTitle(song.name || 'Unknown Title')
             .setURL(song.url || '')
             .setDescription(`
@@ -80,9 +80,9 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
 **Duration:** \`${song.formattedDuration}\`
             `)
             .addFields(
-                { name: '👤 Uploader', value: `\`${song.uploader.name}\``, inline: true },
-                { name: '👀 Views', value: `\`${song.views.toLocaleString()}\``, inline: true },
-                { name: '👍 Likes', value: `\`${song.likes.toLocaleString()}\``, inline: true }
+                { name: '👤 Uploader', value: `\`${(song as any).uploader?.name || 'Unknown'}\``, inline: true },
+                { name: '👀 Views', value: `\`${(song as any).views?.toLocaleString() || '0'}\``, inline: true },
+                { name: '👍 Likes', value: `\`${(song as any).likes?.toLocaleString() || '0'}\``, inline: true }
             )
             .setThumbnail(song.thumbnail || null)
             .setFooter({ text: statusString, iconURL: userIcon || undefined });
