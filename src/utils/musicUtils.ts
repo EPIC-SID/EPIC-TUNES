@@ -99,6 +99,29 @@ ${progressBar} \`[${queue.formattedCurrentTime} / ${song.formattedDuration}]\`
     }
 };
 
+export const getSetupEmbed = (guild: any) => {
+    const banner = guild.bannerURL({ size: 1024 }) || null;
+    const icon = guild.iconURL() || client.user?.displayAvatarURL();
+
+    // Modern Dashboard UI
+    return new EmbedBuilder()
+        .setColor('#2B2D31') // Discord Dark Mode Background - Seamless look
+        .setImage(banner || 'https://i.pinimg.com/originals/26/32/38/2632382dc3d19e9104084c7946a4892c.gif') // Dynamic Server Banner
+        .setDescription(`
+# <a:musical_notes:123456789> NO MUSIC PLAYING
+**Ready to vibe?** 
+Join a voice channel and type your favorite **Song Name** or **Link** right here!
+
+### __**Control Guide**__
+> ⏯️ **Pause/Resume** • ⏹️ **Stop** • ⏭️ **Skip**
+> 🔁 **Loop Mode** • 🔀 **Shuffle** • 📜 **Lyrics**
+> 🔉/🔊 **Volume** • 👤 **Filters**
+
+*Supports: YouTube • Spotify • SoundCloud • Apple Music*
+        `)
+        .setFooter({ text: 'EPIC TUNES • Advanced Music System', iconURL: icon || undefined });
+};
+
 export const resetSetupMessage = async (guildId: string) => {
     const setupChannelId = ConfigManager.getSetupChannelId(guildId);
     const setupMessageId = ConfigManager.getSetupMessageId(guildId);
@@ -113,28 +136,15 @@ export const resetSetupMessage = async (guildId: string) => {
         if (!message) return;
 
         const guild = client.guilds.cache.get(guildId);
-        const banner = guild?.bannerURL({ size: 1024 }) || null;
-        const icon = guild?.iconURL() || client.user?.displayAvatarURL();
+        if (!guild) return;
 
-        const embed = new EmbedBuilder()
-            .setColor('#2B2D31') // Modern Dark Grey/Black
-            .setAuthor({ name: 'EPIC TUNES | Music Controller', iconURL: client.user?.displayAvatarURL() || undefined })
-            .setTitle('💿 No Music Playing')
-            .setDescription(`
-**Ready to vibe?** 
-Join a voice channel and type your favorite song name right here!
+        const embed = getSetupEmbed(guild);
 
-__**Control Guide:**__
-⏯️ **Play/Pause** • ⏹️ **Stop** • ⏭️ **Skip**
-🔁 **Loop** • 🔀 **Shuffle** • 📜 **Lyrics**
-🔉/🔊 **Volume Controls**
-            `)
-            .setImage(banner || 'https://i.pinimg.com/originals/26/32/38/2632382dc3d19e9104084c7946a4892c.gif') // Use Server Banner or fallback GIF
-            .setFooter({ text: 'Type a song name to play • Supports YouTube, Spotify, SoundCloud', iconURL: icon || undefined });
-
+        // Ensure clean state - no buttons when idle
         await message.edit({ embeds: [embed], components: [] });
 
     } catch (e) {
         console.error('Failed to reset setup message:', e);
     }
 };
+
