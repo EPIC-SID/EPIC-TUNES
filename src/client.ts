@@ -17,12 +17,24 @@ export const client = new Client({
 
 const cookies = (() => {
     try {
+        // 1. Check Local File (Development)
         if (fs.existsSync('./cookies.json')) {
             return JSON.parse(fs.readFileSync('./cookies.json', 'utf-8'));
         }
+        // 2. Check Render Secret File (Production)
+        if (fs.existsSync('/etc/secrets/cookies.json')) {
+            console.log('[Startup] Loading cookies from Render Secret File.');
+            return JSON.parse(fs.readFileSync('/etc/secrets/cookies.json', 'utf-8'));
+        }
+        // 3. Check Environment Variable (Fallback)
+        if (process.env.YOUTUBE_COOKIES) {
+            console.log('[Startup] Loading cookies from Environment Variable.');
+            return JSON.parse(process.env.YOUTUBE_COOKIES);
+        }
     } catch (e) {
-        console.warn('Failed to load cookies.json:', e);
+        console.warn('Failed to load cookies:', e);
     }
+    console.warn('[Startup] No cookies found. YouTube playback may fail on data center IPs.');
     return undefined;
 })();
 
