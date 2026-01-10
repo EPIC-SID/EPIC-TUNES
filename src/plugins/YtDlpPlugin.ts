@@ -179,9 +179,12 @@ export class YtDlpPlugin extends PlayableExtractorPlugin {
         }
 
         // REMOVED: noCallHome: true
+        console.log('[YtDlpPlugin] Fetching stream URL for:', song.url);
         const info = await json(song.url, flags).catch((e: any) => {
+            console.error('[YtDlpPlugin] Stream URL fetch failed:', e);
             throw new DisTubeError('YTDLP_ERROR', `${e.message || e}`);
         });
+        console.log('[YtDlpPlugin] Stream URL found:', info.url ? 'Yes' : 'No');
         return info.url as string;
     }
 
