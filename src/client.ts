@@ -2,7 +2,8 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { DisTube } from 'distube';
 import { SpotifyPlugin } from '@distube/spotify';
 import { SoundCloudPlugin } from '@distube/soundcloud';
-import { YtDlpPlugin } from '@distube/yt-dlp';
+// import { YtDlpPlugin } from '@distube/yt-dlp';
+import { YtDlpPlugin } from './plugins/YtDlpPlugin.js'; // Use custom plugin to fix deprecated flag
 import ffmpeg from 'ffmpeg-static';
 import * as fs from 'fs';
 
