@@ -8,7 +8,9 @@ export default {
         const embed = new EmbedBuilder()
             .setColor('#E74C3C')
             .setTitle('🔄 System Reset')
-            .setDescription('All configuration settings have been reset to default values.');
+            .setDescription('All configuration settings have been reset to default values.')
+            .setFooter({ text: `Reset by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
     },
