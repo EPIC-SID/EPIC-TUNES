@@ -7,16 +7,26 @@ export default {
         .setDescription('Play the previous song'),
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
+        if (!queue) {
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#E74C3C')
+                .setDescription('❌ **No music playing!**');
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+        }
 
         try {
             await queue.previous();
             const embed = new EmbedBuilder()
                 .setColor('#5865F2')
-                .setDescription('**⏮️ Rewinding...**\nPlaying the previous track.');
+                .setTitle('⏮️ Rewind')
+                .setDescription('**Playing the previous track.**')
+                .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() });
             return interaction.reply({ embeds: [embed] });
         } catch (e) {
-            return interaction.reply({ content: '❌ No previous song detected!', ephemeral: true });
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#E74C3C')
+                .setDescription('❌ **No previous song available!**');
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
     },
 };
