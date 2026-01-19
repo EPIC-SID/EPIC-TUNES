@@ -11,7 +11,11 @@ export default {
                 .setRequired(true)),
     async execute(interaction: any) {
         if (!interaction.guildId) {
-            return interaction.reply({ content: 'This command can only be used in a server.', ephemeral: true });
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#E74C3C')
+                .setTitle('❌ Error')
+                .setDescription('This command can only be used in a server.');
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
 
         const newPrefix = interaction.options.getString('new_prefix');
@@ -20,7 +24,9 @@ export default {
         const embed = new EmbedBuilder()
             .setColor('#2ECC71')
             .setTitle('🔡 Prefix Updated')
-            .setDescription(`Successfully changed the bot prefix to: \`${newPrefix}\``);
+            .setDescription(`Successfully changed the bot prefix to: \`${newPrefix}\``)
+            .setFooter({ text: 'Prefix changed successfully', iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
     },
