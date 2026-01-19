@@ -13,7 +13,9 @@ export default {
         const embed = new EmbedBuilder()
             .setColor(newStatus ? '#2ECC71' : '#E74C3C')
             .setTitle(newStatus ? '🟢 24/7 Mode Enabled' : '🔴 24/7 Mode Disabled')
-            .setDescription(`The bot will ${newStatus ? 'now stay' : 'no longer stay'} in the voice channel 24/7.`);
+            .setDescription(`The bot will ${newStatus ? 'now stay' : 'no longer stay'} in the voice channel 24/7.`)
+            .setFooter({ text: `Mode changed by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
     },
