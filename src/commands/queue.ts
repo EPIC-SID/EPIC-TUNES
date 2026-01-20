@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -10,8 +11,8 @@ export default {
 
         if (!queue || !queue.songs.length) {
             const emptyEmbed = new EmbedBuilder()
-                .setColor('#95A5A6')
-                .setDescription('**👻 The queue is currently empty!**');
+                .setColor(Theme.Colors.LightGrey as any)
+                .setDescription(`${Theme.Icons.Ghost} **The queue is currently empty!**`);
             return interaction.reply({ embeds: [emptyEmbed], ephemeral: true });
         }
 
@@ -28,11 +29,11 @@ export default {
             const currentSegment = upcomingSongs.slice(start, end);
 
             const embed = new EmbedBuilder()
-                .setColor('#5865F2')
-                .setTitle('🎶 Current Queue')
+                .setColor(Theme.Colors.PremiumBlue as any)
+                .setTitle(`${Theme.Icons.Queue} Current Queue`)
                 .setThumbnail(currentSong.thumbnail || null)
                 .addFields({
-                    name: '💿 Now Playing',
+                    name: `${Theme.Icons.Disc} Now Playing`,
                     value: `**[${currentSong.name}](${currentSong.url})**\nDuration: \`${currentSong.formattedDuration}\` | Requested by: ${currentSong.user}`,
                     inline: false
                 });
@@ -51,7 +52,7 @@ export default {
             const totalSongs = queue.songs.length;
             embed.setFooter({
                 text: `Page ${page + 1}/${totalPages} | Total Songs: ${totalSongs} | Total Duration: ${totalDuration}`,
-                iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp'
+                iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp' // Maybe use Theme icon?
             });
 
             return embed;

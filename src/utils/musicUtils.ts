@@ -2,6 +2,7 @@ import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelec
 import { Queue } from 'distube';
 import { client } from '../client.js';
 import { ConfigManager } from './configManager.js';
+import { Theme } from './theme.js';
 
 export const createMusicComponents = (queue: Queue) => {
     // Select Menu for Filters
@@ -21,26 +22,34 @@ export const createMusicComponents = (queue: Queue) => {
                 ])
         );
 
-    // Button Rows
+    // Row 1: Main Transport Controls
     const row1 = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
-            new ButtonBuilder().setCustomId('music_back').setEmoji('⏮').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_loop').setEmoji('🔁').setStyle(queue.repeatMode > 0 ? ButtonStyle.Success : ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_pause').setEmoji(queue.paused ? '▶' : '⏸').setStyle(queue.paused ? ButtonStyle.Success : ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_shuffle').setEmoji('🔀').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_next').setEmoji('⏭').setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder().setCustomId('music_back').setEmoji(Theme.Icons.Back).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_pause').setEmoji(queue.paused ? Theme.Icons.Play : Theme.Icons.Pause).setStyle(queue.paused ? ButtonStyle.Success : ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_stop').setEmoji(Theme.Icons.Stop).setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId('music_next').setEmoji(Theme.Icons.Skip).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_loop').setEmoji(Theme.Icons.Loop).setStyle(queue.repeatMode > 0 ? ButtonStyle.Success : ButtonStyle.Secondary)
         );
 
+    // Row 2: Secondary Controls + Features
     const row2 = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
-            new ButtonBuilder().setCustomId('music_vol_down').setEmoji('🔉').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_queue').setEmoji('📑').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_stop').setEmoji('⏹').setStyle(ButtonStyle.Danger),
-            new ButtonBuilder().setCustomId('music_info').setEmoji('ℹ️').setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId('music_vol_up').setEmoji('🔊').setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder().setCustomId('music_vol_down').setEmoji(Theme.Icons.VolumeDown).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_vol_up').setEmoji(Theme.Icons.VolumeUp).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_shuffle').setEmoji(Theme.Icons.Shuffle).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_lyrics').setEmoji(Theme.Icons.Lyrics).setStyle(ButtonStyle.Primary), // New
+            new ButtonBuilder().setCustomId('music_save').setEmoji(Theme.Icons.Save).setStyle(ButtonStyle.Success)   // New
         );
 
-    return [filterRow, row1, row2];
+    // Row 3: Info & Queue
+    const row3 = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder().setCustomId('music_queue').setEmoji(Theme.Icons.Queue).setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder().setCustomId('music_info').setEmoji(Theme.Icons.Info).setStyle(ButtonStyle.Secondary)
+        );
+
+    return [filterRow, row1, row2, row3];
 };
 
 export const getSetupComponents = () => {
@@ -49,12 +58,12 @@ export const getSetupComponents = () => {
             new ButtonBuilder()
                 .setCustomId('setup_refresh')
                 .setLabel('Refresh Status')
-                .setEmoji('🔄')
+                .setEmoji(Theme.Icons.Loading)
                 .setStyle(ButtonStyle.Secondary),
             new ButtonBuilder()
                 .setCustomId('setup_help')
                 .setLabel('Help Guide')
-                .setEmoji('❓')
+                .setEmoji(Theme.Icons.Question)
                 .setStyle(ButtonStyle.Success)
         );
     return [row];
@@ -88,11 +97,11 @@ export const updateSetupMessage = async (queue: Queue) => {
         const statusString = `Autoplay: ${autoplayStatus} • Loop: ${loopStatus} • Volume: ${queue.volume} • Queue: ${queue.songs.length - 1} • Duration: ${queue.formattedDuration}`;
 
         const userIcon = song.user?.displayAvatarURL() || null;
-        const progressBar = '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+        const progressBar = `${Theme.Icons.Disc}▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬`;
 
         const embed = new EmbedBuilder()
-            .setColor('#3B82F6') // Premium Blue
-            .setAuthor({ name: 'NOW PLAYING 🎧', iconURL: 'https://bestanimations.com/media/discs/895872755cd-animated-gif-9.gif' })
+            .setColor(Theme.Colors.PremiumBlue as any)
+            .setAuthor({ name: 'NOW PLAYING 🎧', iconURL: Theme.Images.NowPlayingAuthor })
             .setTitle(song.name || 'Unknown Title')
             .setURL(song.url || '')
             .setDescription(`
@@ -122,17 +131,17 @@ export const getSetupEmbed = (guild: any) => {
 
     // Modern Dashboard UI
     return new EmbedBuilder()
-        .setColor('#2B2D31') // Discord Dark Mode Background - Seamless look
-        .setImage(banner || 'https://i.pinimg.com/originals/26/32/38/2632382dc3d19e9104084c7946a4892c.gif') // Dynamic Server Banner
+        .setColor(Theme.Colors.DarkBackground as any)
+        .setImage(banner || Theme.Images.DefaultBanner)
         .setDescription(`
 # <a:musical_notes:123456789> NO MUSIC PLAYING
 **Ready to vibe?** 
 Join a voice channel and type your favorite **Song Name** or **Link** right here!
 
 ### __**Control Guide**__
-> ⏯️ **Pause/Resume** • ⏹️ **Stop** • ⏭️ **Skip**
-> 🔁 **Loop Mode** • 🔀 **Shuffle** • 📜 **Lyrics**
-> 🔉/🔊 **Volume** • 👤 **Filters**
+> ${Theme.Icons.Pause} **Pause/Resume** • ${Theme.Icons.Stop} **Stop** • ${Theme.Icons.Skip} **Skip**
+> ${Theme.Icons.Loop} **Loop Mode** • ${Theme.Icons.Shuffle} **Shuffle** • ${Theme.Icons.Lyrics} **Lyrics**
+> ${Theme.Icons.VolumeUp} **Volume** • 👤 **Filters** • ${Theme.Icons.Save} **Save**
 
 *Supports: YouTube • Spotify • SoundCloud • Apple Music*
         `)

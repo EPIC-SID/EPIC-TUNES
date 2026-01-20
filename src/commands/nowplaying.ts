@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -7,7 +8,7 @@ export default {
         .setDescription('Shows the currently playing song with progress'),
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
+        if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
 
         const song = queue.songs[0];
         const currentTime = queue.currentTime;
@@ -18,16 +19,16 @@ export default {
         const progressInt = Math.round((progress * size) / 100);
         const emptyProg = size - progressInt;
 
-        const bar = '▇'.repeat(progressInt) + '🔘' + '—'.repeat(emptyProg);
+        const bar = '▇'.repeat(progressInt) + Theme.Icons.Disc + '—'.repeat(emptyProg);
 
         const embed = new EmbedBuilder()
-            .setColor('#5865F2')
-            .setTitle('💿 Now Playing')
+            .setColor(Theme.Colors.PremiumBlue as any)
+            .setTitle(`${Theme.Icons.Disc} Now Playing`)
             .setDescription(`**[${song.name}](${song.url})**`)
             .setThumbnail(song.thumbnail || null)
             .addFields(
                 {
-                    name: 'Duration',
+                    name: `${Theme.Icons.Clock} Duration`,
                     value: `\`${queue.formattedCurrentTime}\` ${bar} \`${song.formattedDuration}\``,
                     inline: false
                 },

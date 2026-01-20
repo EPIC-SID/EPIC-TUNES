@@ -1,5 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { getSongLyrics, createLyricsEmbed } from '../utils/lyricsUtils.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -19,17 +21,15 @@ export default {
             if (queue && queue.songs.length > 0) {
                 query = queue.songs[0].name;
             } else {
-                return interaction.editReply({ content: '❌ No music playing! Please provide a search query.' });
+                return interaction.editReply({ content: `${Theme.Icons.Error} No music playing! Please provide a search query.` });
             }
         }
 
         try {
-            // Use shared utility
-            const { getSongLyrics, createLyricsEmbed } = require('../utils/lyricsUtils.js');
             const result = await getSongLyrics(query);
 
             if (!result) {
-                return interaction.editReply({ content: `❌ No lyrics found for **${query}**` });
+                return interaction.editReply({ content: `${Theme.Icons.Error} No lyrics found for **${query}**` });
             }
 
             const embed = createLyricsEmbed(result);
@@ -37,7 +37,7 @@ export default {
 
         } catch (e) {
             console.error(e);
-            await interaction.editReply({ content: `❌ Error fetching lyrics: ${e}` });
+            await interaction.editReply({ content: `${Theme.Icons.Error} Error fetching lyrics: ${e}` });
         }
     },
 };

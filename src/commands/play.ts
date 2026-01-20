@@ -2,6 +2,7 @@ import { SlashCommandBuilder, GuildMember, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
 // @ts-ignore
 import yts from 'yt-search';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -18,7 +19,7 @@ export default {
         const voiceChannel = member.voice.channel;
 
         if (!voiceChannel) {
-            return interaction.reply({ content: '❌ Connect to a voice channel first!', ephemeral: true });
+            return interaction.reply({ content: `${Theme.Icons.Error} Connect to a voice channel first!`, ephemeral: true });
         }
 
         // Defer reply immediately for better responsiveness
@@ -26,10 +27,10 @@ export default {
 
         // Check for playlist indicators in URL
         const isPlaylist = query.includes('list=') || query.includes('playlist') || query.includes('album');
-        const searchMsg = isPlaylist ? '**🔄 Loading Playlist... (This may take a while)**' : '**🔎 Searching...**';
+        const searchMsg = isPlaylist ? `**${Theme.Icons.Loading} Loading Playlist... (This may take a while)**` : `**${Theme.Icons.Disc} Searching...**`;
 
         const searchEmbed = new EmbedBuilder()
-            .setColor('#5865F2') // Blurple for searching
+            .setColor(Theme.Colors.PremiumBlue as any) // Blurple for searching
             .setDescription(searchMsg);
         await interaction.editReply({ embeds: [searchEmbed] });
 
@@ -41,7 +42,7 @@ export default {
                 // Manually search YouTube because native Distube search can be flaky ("NO_RESULT")
                 const searchResults = await yts(query);
                 if (!searchResults || !searchResults.videos.length) {
-                    const errorEmbed = new EmbedBuilder().setColor('#FF0000').setDescription('❌ No results found.');
+                    const errorEmbed = new EmbedBuilder().setColor(Theme.Colors.Error as any).setDescription(`${Theme.Icons.Error} No results found.`);
                     return interaction.editReply({ embeds: [errorEmbed] });
                 }
                 // Use the URL of the first result
@@ -72,8 +73,8 @@ export default {
         } catch (e) {
             console.error('[Play Command Error]', e);
             const errorEmbed = new EmbedBuilder()
-                .setColor('#FF0000') // Red
-                .setTitle('❌ Error')
+                .setColor(Theme.Colors.Error as any) // Red
+                .setTitle(`${Theme.Icons.Error} Error`)
                 .setDescription(`${e instanceof Error ? e.message : String(e)}`);
 
             // If interaction is still deferred/active, edit the reply to show error

@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -9,8 +10,8 @@ export default {
         distube.voices.leave(interaction.guildId!);
 
         const embed = new EmbedBuilder()
-            .setColor('#E74C3C')
-            .setDescription('**👋 Disconnected.**\nThanks for vibing! See you soon.');
+            .setColor(Theme.Colors.Warning as any) // Disconnect usually warning or error color, or just info.
+            .setDescription(`${Theme.Icons.Stop} **Disconnected.**\nThanks for vibing! See you soon.`);
 
         return interaction.reply({ embeds: [embed] });
     },

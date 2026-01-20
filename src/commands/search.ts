@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType, GuildMember } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 // @ts-ignore
 import yts from 'yt-search';
 
@@ -18,7 +19,7 @@ export default {
         const voiceChannel = member.voice.channel;
 
         if (!voiceChannel) {
-            return interaction.reply({ content: '❌ Connect to a voice channel first!', ephemeral: true });
+            return interaction.reply({ content: `${Theme.Icons.Error} Connect to a voice channel first!`, ephemeral: true });
         }
 
         await interaction.deferReply();
@@ -26,7 +27,7 @@ export default {
         try {
             const searchResults = await yts(query);
             if (!searchResults || !searchResults.videos.length) {
-                return interaction.editReply({ content: '❌ No results found.' });
+                return interaction.editReply({ content: `${Theme.Icons.Error} No results found.` });
             }
 
             // Get top 10 videos
@@ -36,7 +37,7 @@ export default {
                 label: v.title.substring(0, 100), // Limit label length
                 description: `Duration: ${v.timestamp} | ${v.author.name}`,
                 value: v.url,
-                emoji: '🎵'
+                emoji: Theme.Icons.Music
             }));
 
             const selectMenu = new StringSelectMenuBuilder()
@@ -47,8 +48,8 @@ export default {
             const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
             const embed = new EmbedBuilder()
-                .setColor('#5865F2')
-                .setTitle(`🔎 Results for "${query}"`)
+                .setColor(Theme.Colors.PremiumBlue as any)
+                .setTitle(`${Theme.Icons.Search} Results for "${query}"`)
                 .setDescription('Select a song from the dropdown menu below to add it to the queue.')
                 .setFooter({ text: 'Selection times out in 60 seconds' });
 
@@ -61,13 +62,13 @@ export default {
 
             collector.on('collect', async (i: any) => {
                 if (i.user.id !== interaction.user.id) {
-                    return i.reply({ content: '❌ These results are not for you!', ephemeral: true });
+                    return i.reply({ content: `${Theme.Icons.Error} These results are not for you!`, ephemeral: true });
                 }
 
                 const url = i.values[0];
                 const selectedVideo = videos.find((v: any) => v.url === url);
 
-                await i.update({ content: `✅ **Selected:** ${selectedVideo.title}`, embeds: [], components: [] });
+                await i.update({ content: `${Theme.Icons.Success} **Selected:** ${selectedVideo.title}`, embeds: [], components: [] });
 
                 await distube.play(voiceChannel, url, {
                     member: member,
@@ -79,13 +80,13 @@ export default {
 
             collector.on('end', (collected: any, reason: string) => {
                 if (reason === 'time') {
-                    interaction.editReply({ content: '❌ Search timed out.', components: [] }).catch(() => { });
+                    interaction.editReply({ content: `${Theme.Icons.Error} Search timed out.`, components: [] }).catch(() => { });
                 }
             });
 
         } catch (e) {
             console.error(e);
-            interaction.editReply({ content: '❌ An error occurred while searching.' });
+            interaction.editReply({ content: `${Theme.Icons.Error} An error occurred while searching.` });
         }
     },
 };

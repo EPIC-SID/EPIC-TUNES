@@ -1,5 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { checkDJPermission } from '../utils/permissionUtils.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -17,13 +19,12 @@ export default {
         ),
     async execute(interaction: any) {
         // DJ Permission Check
-        const { checkDJPermission } = require('../utils/permissionUtils.js');
         if (!checkDJPermission(interaction)) {
-            return interaction.reply({ content: '❌ You need the **DJ Role** to use this command!', ephemeral: true });
+            return interaction.reply({ content: `${Theme.Icons.Error} You need the **DJ Role** to use this command!`, ephemeral: true });
         }
 
         const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
+        if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
 
         const mode = parseInt(interaction.options.getString('mode'));
         const active = queue.setRepeatMode(mode);
@@ -32,7 +33,7 @@ export default {
         const icons = ['➡️', '🔂', '🔁'];
 
         const embed = new EmbedBuilder()
-            .setColor('#F39C12')
+            .setColor(Theme.Colors.Warning as any) // Orange-ish
             .setTitle(`Loop Mode: ${modes[active]}`)
             .setDescription(`**${icons[active]} Repeat mode updated.**`);
 

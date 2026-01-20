@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -14,8 +15,8 @@ export default {
         const uptimeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
         const embed = new EmbedBuilder()
-            .setColor('#3498DB')
-            .setTitle('⏱️ System Uptime')
+            .setColor(Theme.Colors.Info as any)
+            .setTitle(`${Theme.Icons.Clock} System Uptime`)
             .setDescription(`I have been online for: **${uptimeString}**`);
 
         await interaction.reply({ embeds: [embed] });

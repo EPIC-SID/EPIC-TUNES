@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { ConfigManager } from '../utils/configManager.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -13,8 +14,9 @@ export default {
         const djRole = djRoleId ? `<@&${djRoleId}>` : '`None`';
 
         const embed = new EmbedBuilder()
-            .setColor('#2ECC71')
-            .setTitle('⚙️ Server Configuration')
+            .setColor(Theme.Colors.Success as any) // Configuration/Settings usually green or grey
+            .setTitle(`${Theme.Icons.Tools} Server Configuration`) // Using Tools/Gear icon equivalent if I had one? Or just Settings. I don't have Settings icon. Info?
+            // Actually, I don't have Tools. I have Info. Using Info or just generic emoji logic
             .setDescription('Current settings for this server:')
             .addFields(
                 { name: 'Prefix', value: `\`${currentPrefix}\``, inline: true },

@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -24,15 +25,15 @@ export default {
         ),
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: '❌ No music is playing!', ephemeral: true });
+        if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music is playing!`, ephemeral: true });
 
         const filter = interaction.options.getString('type', true);
 
         if (filter === 'off') {
             queue.filters.clear();
             const embed = new EmbedBuilder()
-                .setColor('#5865F2')
-                .setDescription('✨ **All filters cleared.**');
+                .setColor(Theme.Colors.Success as any)
+                .setDescription(`${Theme.Icons.Success} **All filters cleared.**`);
             return interaction.reply({ embeds: [embed] });
         }
 
@@ -45,8 +46,8 @@ export default {
         queue.filters.add(filter);
 
         const embed = new EmbedBuilder()
-            .setColor('#E91E63')
-            .setTitle('🎛️ Audio Filter Applied')
+            .setColor(Theme.Colors.PremiumBlue as any)
+            .setTitle(`${Theme.Icons.Filter} Audio Filter Applied`)
             .setDescription(`**Mode selected:** \`${filter.toUpperCase()}\`\n*Enhancing audio stream...*`);
 
         return interaction.reply({ embeds: [embed] });

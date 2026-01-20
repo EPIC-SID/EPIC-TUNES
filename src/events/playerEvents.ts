@@ -3,6 +3,7 @@ import { client, distube as distubeClient } from '../client.js';
 import { Queue, Song, Playlist } from 'distube';
 import { ConfigManager } from '../utils/configManager.js';
 import { createMusicComponents, updateSetupMessage, resetSetupMessage } from '../utils/musicUtils.js';
+import { Theme } from '../utils/theme.js';
 
 const distube = distubeClient as any;
 
@@ -26,11 +27,11 @@ distube
         const userIcon = song.user?.displayAvatarURL() || null;
 
         // Progress Bar (Static at start)
-        const progressBar = '🔘▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+        const progressBar = `${Theme.Icons.Disc}▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬`;
 
         const embed = new EmbedBuilder()
-            .setColor('#3B82F6') // Premium Blue
-            .setAuthor({ name: 'NOW PLAYING 🎧', iconURL: 'https://bestanimations.com/media/discs/895872755cd-animated-gif-9.gif' })
+            .setColor(Theme.Colors.PremiumBlue as any)
+            .setAuthor({ name: 'NOW PLAYING 🎧', iconURL: Theme.Images.NowPlayingAuthor })
             .setTitle(song.name || 'Unknown Title')
             .setURL(song.url || '')
             .setDescription(`
@@ -73,13 +74,13 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
             // In setup channel, just sync the message (done above) and maybe delete user message (already handled in messageCreate)
             // We can send a temp "Added to queue" message if verified
             const embed = new EmbedBuilder()
-                .setColor('#2ECC71')
-                .setDescription(`⊕ Added **[${song.name}](${song.url})** to Queue`);
+                .setColor(Theme.Colors.Success as any)
+                .setDescription(`${Theme.Icons.Success} Added **[${song.name}](${song.url})** to Queue`);
             queue.textChannel?.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => { }), 3000));
         } else {
             const embed = new EmbedBuilder()
-                .setColor('#2ECC71')
-                .setDescription(`⊕ Added **[${song.name}](${song.url})** • ${song.formattedDuration} To Queue`);
+                .setColor(Theme.Colors.Success as any)
+                .setDescription(`${Theme.Icons.Success} Added **[${song.name}](${song.url})** • ${song.formattedDuration} To Queue`);
             queue.textChannel?.send({ embeds: [embed] });
         }
     })
@@ -89,13 +90,13 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
 
         if (queue.textChannel?.id === ConfigManager.getSetupChannelId(queue.textChannel?.guild.id || '')) {
             const embed = new EmbedBuilder()
-                .setColor('#2ECC71')
-                .setDescription(`✅ Playlist **[${playlist.name}](${playlist.url})** added (${playlist.songs.length} songs)`);
+                .setColor(Theme.Colors.Success as any)
+                .setDescription(`${Theme.Icons.Success} Playlist **[${playlist.name}](${playlist.url})** added (${playlist.songs.length} songs)`);
             queue.textChannel?.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => { }), 3000));
         } else {
             const embed = new EmbedBuilder()
-                .setColor('#2ECC71') // Green for success
-                .setTitle('✅ Playlist Added')
+                .setColor(Theme.Colors.Success as any)
+                .setTitle(`${Theme.Icons.Success} Playlist Added`)
                 .setDescription(`**[${playlist.name}](${playlist.url})**`)
                 .addFields(
                     { name: 'Songs', value: `\`${playlist.songs.length}\``, inline: true },
@@ -107,8 +108,8 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
     .on('error', (error: any, queue: Queue) => {
         if (queue && queue.textChannel) {
             const embed = new EmbedBuilder()
-                .setColor('#FF0000') // Red
-                .setTitle('❌ Error')
+                .setColor(Theme.Colors.Error as any)
+                .setTitle(`${Theme.Icons.Error} Error`)
                 .setDescription(error.toString().slice(0, 4096)); // Embed desc limit is 4096
             queue.textChannel.send({ embeds: [embed] });
         }
@@ -125,7 +126,7 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#3498DB') // Blue
+            .setColor(Theme.Colors.Info as any)
             .setDescription('🏁 **Queue finished!**');
 
         if (is247) {
@@ -145,8 +146,8 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#E74C3C') // Red
-            .setDescription('🔌 **Disconnected!**');
+            .setColor(Theme.Colors.Error as any)
+            .setDescription(`${Theme.Icons.Error} **Disconnected!**`);
         queue.textChannel?.send({ embeds: [embed] });
     })
     .on('empty', (queue: Queue) => {
@@ -154,13 +155,13 @@ ${progressBar} \`[0:00 / ${song.formattedDuration}]\`
 
         if (is247) {
             const embed = new EmbedBuilder()
-                .setColor('#2ECC71')
-                .setDescription('👻 **Channel is empty, but 24/7 mode is ON. Staying...**');
+                .setColor(Theme.Colors.Success as any)
+                .setDescription(`${Theme.Icons.Ghost} **Channel is empty, but 24/7 mode is ON. Staying...**`);
             queue.textChannel?.send({ embeds: [embed] });
         } else {
             const embed = new EmbedBuilder()
-                .setColor('#2B2D31') // Dark Grey
-                .setDescription('👻 **Channel is empty. Leaving...**');
+                .setColor(Theme.Colors.DarkBackground as any)
+                .setDescription(`${Theme.Icons.Ghost} **Channel is empty. Leaving...**`);
             queue.textChannel?.send({ embeds: [embed] });
 
             // Reset setup message if leaving

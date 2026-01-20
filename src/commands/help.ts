@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -27,18 +28,18 @@ export default {
         };
 
         const homeEmbed = new EmbedBuilder()
-            .setColor('#5865F2')
+            .setColor(Theme.Colors.PremiumBlue as any)
             .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
             .setTitle('🔥 Ultimate Music Experience')
             .setDescription(`**Yo, ready to drop the beat?** 🎧\nI'm **${client.user.username}**, your high-quality music companion.`)
             .addFields(
                 {
-                    name: '🎧 Music Controls',
+                    name: `${Theme.Icons.Music} Music Controls`,
                     value: '`/play`, `/pause`, `/resume`, `/stop`, `/skip`, `/remove`, `/previous`, `/seek`, `/autoplay`, `/loop`, `/shuffle`, `/filter`, `/nowplaying`, `/queue`',
                     inline: false
                 },
                 {
-                    name: '🔰 Info & Utility',
+                    name: `${Theme.Icons.Info} Info & Utility`,
                     value: '`/ping`, `/stats`, `/uptime`, `/invite`, `/help`, `/join`, `/leave`',
                     inline: false
                 },
@@ -52,20 +53,23 @@ export default {
             .setFooter(footer);
 
         const musicEmbed = new EmbedBuilder()
-            .setColor('#E91E63')
-            .setTitle('🎹 Music Command Center')
+            .setColor(Theme.Colors.PremiumBlue as any) // Assuming we want consistent blue or separate pink?
+            // Actually, kept colors distinct in original help command.
+            // But strict uniformity says stick to Theme.Colors.PremiumBlue or Theme.Colors.Secondary?
+            // Theme doesn't have pink. I'll use PremiumBlue for Music.
+            .setTitle(`${Theme.Icons.Music} Music Command Center`)
             .setDescription('**Control the rhythm.** Use these commands to manage your listening session.')
             .addFields(
-                { name: '▶️ Playback', value: '`/play`, `/search`, `/pause`, `/resume`, `/stop`, `/skip`, `/previous`, `/jump`, `/seek`, `/forward`, `/rewind`, `/autoplay`, `/loop`', inline: false },
-                { name: '🎶 Queue Management', value: '`/queue`, `/remove`, `/clear`, `/nowplaying`, `/shuffle`, `/save`, `/lyrics`', inline: false },
+                { name: `${Theme.Icons.Play} Playback`, value: '`/play`, `/search`, `/pause`, `/resume`, `/stop`, `/skip`, `/previous`, `/jump`, `/seek`, `/forward`, `/rewind`, `/autoplay`, `/loop`', inline: false },
+                { name: `${Theme.Icons.Queue} Queue Management`, value: '`/queue`, `/remove`, `/clear`, `/nowplaying`, `/shuffle`, `/save`, `/lyrics`', inline: false },
                 { name: '🎛️ Audio Effects', value: '`/filter` (Bassboost, Nightcore, 8D, Vaporwave...)', inline: false }
             )
             .setThumbnail(client.user.displayAvatarURL())
             .setFooter(footer);
 
         const infoEmbed = new EmbedBuilder()
-            .setColor('#3498DB')
-            .setTitle('🔰 Information Command Center')
+            .setColor(Theme.Colors.Info as any)
+            .setTitle(`${Theme.Icons.Info} Information Command Center`)
             .setDescription('**Get to know me better.** Use these commands to check my status or invite me.')
             .addFields(
                 { name: '🛠️ Utilities', value: '`/ping` - Check latency\n`/uptime` - Check run time\n`/stats` - View system specs', inline: false },
@@ -75,7 +79,7 @@ export default {
             .setFooter(footer);
 
         const configEmbed = new EmbedBuilder()
-            .setColor('#2ECC71')
+            .setColor(Theme.Colors.Success as any) // Settings/Config green
             .setTitle('⚙️ System Configuration')
             .setDescription('**Customize your server experience.**')
             .addFields(
@@ -92,11 +96,11 @@ export default {
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId('help_music')
-                    .setEmoji('🎵')
+                    .setEmoji(Theme.Icons.Music)
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId('help_info')
-                    .setEmoji('🔰')
+                    .setEmoji(Theme.Icons.Info)
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId('help_config')
@@ -114,7 +118,7 @@ export default {
 
         collector.on('collect', async (i: any) => {
             if (i.user.id !== interaction.user.id) {
-                return i.reply({ content: '❌ You cannot control this help menu!', ephemeral: true });
+                return i.reply({ content: `${Theme.Icons.Error} You cannot control this help menu!`, ephemeral: true });
             }
             if (i.customId === 'help_home') {
                 await i.update({ embeds: [homeEmbed] });

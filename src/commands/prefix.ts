@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { ConfigManager } from '../utils/configManager.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -12,8 +13,8 @@ export default {
     async execute(interaction: any) {
         if (!interaction.guildId) {
             const errorEmbed = new EmbedBuilder()
-                .setColor('#E74C3C')
-                .setTitle('❌ Error')
+                .setColor(Theme.Colors.Error as any)
+                .setTitle(`${Theme.Icons.Error} Error`)
                 .setDescription('This command can only be used in a server.');
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
@@ -22,7 +23,7 @@ export default {
         ConfigManager.setPrefix(interaction.guildId, newPrefix);
 
         const embed = new EmbedBuilder()
-            .setColor('#2ECC71')
+            .setColor(Theme.Colors.Success as any)
             .setTitle('🔡 Prefix Updated')
             .setDescription(`Successfully changed the bot prefix to: \`${newPrefix}\``)
             .setFooter({ text: 'Prefix changed successfully', iconURL: interaction.user.displayAvatarURL() })

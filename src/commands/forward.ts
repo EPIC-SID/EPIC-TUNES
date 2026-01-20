@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -12,7 +13,7 @@ export default {
         ),
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: '❌ No music playing!', ephemeral: true });
+        if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
 
         const seconds = interaction.options.getInteger('seconds') || 10;
         const currentField = queue.currentTime;
@@ -25,14 +26,14 @@ export default {
         try {
             queue.seek(seekTime);
             const embed = new EmbedBuilder()
-                .setColor('#3498DB')
-                .setTitle('⏩ Fast Forwarding')
+                .setColor(Theme.Colors.PremiumBlue as any)
+                .setTitle(`${Theme.Icons.Forward} Fast Forwarding`)
                 .setDescription(`Fast forwarded **${seconds}s**\nNow at: \`${queue.formattedCurrentTime}\``);
 
             await interaction.reply({ embeds: [embed] });
         } catch (e) {
             console.error(e);
-            await interaction.reply({ content: `❌ Error: ${e}`, ephemeral: true });
+            await interaction.reply({ content: `${Theme.Icons.Error} Error: ${e}`, ephemeral: true });
         }
     },
 };

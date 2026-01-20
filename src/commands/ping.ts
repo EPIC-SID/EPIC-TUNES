@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { Theme } from '../utils/theme.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -10,7 +11,7 @@ export default {
         const apiPing = interaction.client.ws.ping;
 
         const embed = new EmbedBuilder()
-            .setColor('#2ECC71')
+            .setColor(Theme.Colors.Success as any)
             .setTitle('🏓 Pong!')
             .addFields(
                 { name: 'Latency', value: `\`${latency}ms\``, inline: true },

@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, version as djsVersion } from 'discord.js';
+import { Theme } from '../utils/theme.js';
 import os from 'os';
 
 export default {
@@ -15,7 +16,7 @@ export default {
         const minutes = Math.floor((uptime % 3600) / 60);
 
         const embed = new EmbedBuilder()
-            .setColor('#5865F2')
+            .setColor(Theme.Colors.PremiumBlue as any)
             .setTitle('📊 Epic Tunes Statistics')
             .setThumbnail(client.user?.displayAvatarURL())
             .setDescription('**System Status & Performance**')

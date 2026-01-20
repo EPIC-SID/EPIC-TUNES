@@ -1,0 +1,47 @@
+export const Theme = {
+    Colors: {
+        PremiumBlue: '#3B82F6',
+        Success: '#2ECC71',
+        Error: '#FF0000',
+        Info: '#3498DB',
+        Warning: '#E74C3C',
+        DarkBackground: '#2C2F33',
+        Grey: '#95A5A6',
+        Gold: '#F1C40F',
+    },
+    Icons: {
+        Music: '🎵',
+        Play: '▶️',
+        Pause: '⏸️',
+        Stop: '⏹️',
+        Skip: '⏭️',
+        Back: '⏮️',
+        Loop: '🔁',
+        Shuffle: '🔀',
+        VolumeUp: '🔊',
+        VolumeDown: '🔉',
+        Lyrics: '📜',
+        Save: '💾',
+        Info: 'ℹ️',
+        Queue: '📑',
+        Error: '❌',
+        Success: '✅',
+        Loading: '🔄',
+        Question: '❓',
+        Ghost: '👻',
+        Disc: '🔘',
+        Warning: '⚠️',
+        Tools: '🛠️',
+        Forward: '⏩',
+        Rewind: '⏪',
+        Filter: '🎛️',
+        Trash: '🗑️',
+        Clock: '⏰',
+        Search: '🔎',
+    },
+    Images: {
+        // High quality animated disc or similar
+        NowPlayingAuthor: 'https://bestanimations.com/media/discs/895872755cd-animated-gif-9.gif',
+        DefaultBanner: 'https://i.pinimg.com/originals/26/32/38/2632382dc3d19e9104084c7946a4892c.gif'
+    }
+};
