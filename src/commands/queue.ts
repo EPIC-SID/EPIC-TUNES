@@ -11,7 +11,7 @@ export default {
 
         if (!queue || !queue.songs.length) {
             const emptyEmbed = new EmbedBuilder()
-                .setColor(Theme.Colors.LightGrey as any)
+                .setColor(Theme.Colors.Grey as any)
                 .setDescription(`${Theme.Icons.Ghost} **The queue is currently empty!**`);
             return interaction.reply({ embeds: [emptyEmbed], ephemeral: true });
         }
@@ -63,12 +63,12 @@ export default {
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('queue_prev')
-                        .setEmoji('⬅️')
+                        .setEmoji(Theme.Icons.Back)
                         .setStyle(ButtonStyle.Secondary)
                         .setDisabled(page === 0),
                     new ButtonBuilder()
                         .setCustomId('queue_next')
-                        .setEmoji('➡️')
+                        .setEmoji(Theme.Icons.Skip)
                         .setStyle(ButtonStyle.Secondary)
                         .setDisabled(page === totalPages - 1 || totalPages === 0)
                 );
@@ -90,7 +90,7 @@ export default {
 
         collector.on('collect', async (i: any) => {
             if (i.user.id !== interaction.user.id) {
-                return i.reply({ content: '❌ You cannot control this queue display!', ephemeral: true });
+                return i.reply({ content: `${Theme.Icons.Error} You cannot control this queue display!`, ephemeral: true });
             }
 
             if (i.customId === 'queue_prev') {
