@@ -51,6 +51,10 @@ export const distube = new DisTube(client, {
                 'reconnect_delay_max': '5',
                 'reconnect_at_eof': '1',
                 'reconnect_on_network_error': '1'
+            },
+            input: {
+                'analyzeduration': '0',
+                'probesize': '32'
             }
         }
     },
@@ -61,7 +65,7 @@ export const distube = new DisTube(client, {
             cookies: cookies,
             httpChunkSize: 1048576,
             ytdlOptions: {
-                quality: 'highestaudio',
+                format: 'bestaudio/best',
                 highWaterMark: 1 << 25
             }
         } as any)
