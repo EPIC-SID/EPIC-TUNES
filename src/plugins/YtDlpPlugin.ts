@@ -149,6 +149,9 @@ export class YtDlpPlugin extends PlayableExtractorPlugin {
         });
 
         if (Array.isArray(info.entries)) { // Playlist
+            if (info.entries.length === 1) {
+                return new YtDlpSong(this, info.entries[0], options) as unknown as Song<T>;
+            }
             return new Playlist({
                 source: 'youtube',
                 songs: info.entries.map((i: any) => new YtDlpSong(this, i, options)),

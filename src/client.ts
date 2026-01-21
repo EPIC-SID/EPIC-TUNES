@@ -54,7 +54,7 @@ export const distube = new DisTube(client, {
             },
             input: {
                 'analyzeduration': '0',
-                'probesize': '32'
+                'probesize': '1000000'
             }
         }
     },
