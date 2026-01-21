@@ -1,8 +1,7 @@
 import { Events, Message } from 'discord.js';
 import { client, distube } from '../client.js';
 import { ConfigManager } from '../utils/configManager.js';
-// @ts-ignore
-import yts from 'yt-search';
+
 
 // Legacy Text Command Handler (Shim)
 client.on(Events.MessageCreate, async (message: Message) => {
@@ -33,11 +32,8 @@ client.on(Events.MessageCreate, async (message: Message) => {
             const isUrl = /^(https?:\/\/)/.test(query);
 
             if (!isUrl) {
-                // Use yt-search for names to avoid "NO_RESULT" or flaky default search
-                const searchResults = await yts(query);
-                if (searchResults && searchResults.videos.length > 0) {
-                    query = searchResults.videos[0].url;
-                }
+                // Use ytsearch1: for native, fast search
+                query = `ytsearch1:${query}`;
             }
 
             await distube.play(voiceChannel, query, {
