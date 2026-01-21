@@ -1,7 +1,6 @@
 import { SlashCommandBuilder, GuildMember, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
-// @ts-ignore
-import yts from 'yt-search';
+
 import { Theme } from '../utils/theme.js';
 
 export default {
@@ -38,15 +37,10 @@ export default {
             // Check if query is a URL
             const isUrl = /^(https?:\/\/)/.test(query);
 
+            // If it's not a URL, we use ytsearch1: to explicitly tell yt-dlp to search
+            // This significantly reduces latency by skipping the manual search step
             if (!isUrl) {
-                // Manually search YouTube because native Distube search can be flaky ("NO_RESULT")
-                const searchResults = await yts(query);
-                if (!searchResults || !searchResults.videos.length) {
-                    const errorEmbed = new EmbedBuilder().setColor(Theme.Colors.Error as any).setDescription(`${Theme.Icons.Error} No results found.`);
-                    return interaction.editReply({ embeds: [errorEmbed] });
-                }
-                // Use the URL of the first result
-                query = searchResults.videos[0].url;
+                query = `ytsearch1:${query}`;
             }
 
             // Create a timeout promise to prevent hanging
