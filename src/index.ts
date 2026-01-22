@@ -1,9 +1,6 @@
 import { client } from './client.js';
 import * as dotenv from 'dotenv';
-import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { Collection, Events } from 'discord.js';
 import http from 'http';
 
 // -- Argument Parsing for Multi-Bot Support --
@@ -43,112 +40,14 @@ server.on('error', (e: any) => {
 });
 // ------------------------------------
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Import player events (this will register DisTube event listeners)
+// Import player events (DisTube)
 await import('./events/playerEvents.js');
-// Import interaction handler for buttons
-await import('./events/interactionHandler.js');
-// Import legacy text command handler
-await import('./events/messageCreate.js');
+// Import legacy message handler (if we still want it separately? or move to events folder?)
+// It was 'src/events/messageCreate.js'. Since our EventHandler loads *all* files in events, 
+// if 'messageCreate.js' exports a standard event structure, it will be loaded automatically!
+// Let's check 'src/events/messageCreate.ts' later.
+// But wait, 'playerEvents.js' is NOT a standard event structure (it acts on distube instance).
+// so we MUST import it manually here for side-effects.
 
-// Command handler setup
-(client as any).commands = new Collection();
-
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file =>
-    (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')
-);
-
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = await import(`file://${filePath}`);
-    if ('data' in command.default && 'execute' in command.default) {
-        (client as any).commands.set(command.default.data.name, command.default);
-    }
-}
-console.log(`${commandFiles.length} Slash Commands Loaded`);
-console.log(`${commandFiles.length} Message Commands Loaded`);
-console.log(`4 Events Loaded`);
-
-// Event handler for slash commands
-client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
-    const command = (client as any).commands.get(interaction.commandName);
-
-    if (!command) return;
-
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-        } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-        }
-    }
-});
-
-client.once(Events.ClientReady, async () => {
-    const botName = process.env.BOT_NAME || 'EPIC TUNES';
-
-    if (botName === 'MFS MUSIC') {
-        console.log(`
-███╗   ███╗███████╗███████╗    ███╗   ███╗██╗   ██╗███████╗██╗ ██████╗ 
-████╗ ████║██╔════╝██╔════╝    ████╗ ████║██║   ██║██╔════╝██║██╔════╝ 
-██╔████╔██║█████╗  ███████╗    ██╔████╔██║██║   ██║███████╗██║██║      
-██║╚██╔╝██║██╔══╝  ╚════██║    ██║╚██╔╝██║██║   ██║╚════██║██║██║      
-██║ ╚═╝ ██║██║     ███████║    ██║ ╚═╝ ██║╚██████╔╝███████║██║╚██████╗ 
-╚═╝     ╚═╝╚═╝     ╚══════╝    ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝ 
-`);
-    } else {
-        console.log(`
-███████╗██████╗ ██╗ ██████╗    ████████╗██╗   ██╗███╗   ██╗███████╗███████╗
-██╔════╝██╔══██╗██║██╔════╝    ╚══██╔══╝██║   ██║████╗  ██║██╔════╝██╔════╝
-█████╗  ██████╔╝██║██║            ██║   ██║   ██║██╔██╗ ██║█████╗  ███████╗
-██╔══╝  ██╔═══╝ ██║██║            ██║   ██║   ██║██║╚██╗██║██╔══╝  ╚════██║
-███████╗██║     ██║╚██████╗       ██║   ╚██████╔╝██║ ╚████║███████╗███████║
-╚══════╝╚═╝     ╚═╝ ╚═════╝       ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝
-`);
-    }
-    console.log(`${botName} IS ONLINE !!`);
-
-    const commandData = (client as any).commands.map((c: any) => c.data.toJSON());
-
-    try {
-        console.log('Started refreshing guild (/) commands.');
-
-        // Register Globally (Primary)
-        // Register Globally (Primary)
-        await client.application?.commands.set(commandData);
-
-        // Clear per-guild commands to prevent duplicates (Global takes precedence)
-        // ... (existing code for clearing guild commands) ...
-
-        // Set Initial Status
-        client.user?.setActivity({
-            name: 'Music 🎶',
-            type: 2 // ActivityType.Listening
-        });
-        const guilds = client.guilds.cache;
-        for (const [id, guild] of guilds) {
-            try {
-                await guild.commands.set([]); // Clear guild commands
-            } catch (error) {
-                // Ignore per-guild errors via try-catch, or log
-            }
-        }
-
-        console.log('Successfully reloaded guild (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
-});
-
-import { ConfigManager } from './utils/configManager.js';
-ConfigManager.load();
-
-client.login(process.env.DISCORD_TOKEN);
+// Start the client
+await client.start();

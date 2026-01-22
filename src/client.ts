@@ -1,5 +1,5 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import { DisTube } from 'distube';
+import { ExtendedClient } from './structures/Client.js';
+import { DisTube } from 'distube'; // Only importing DisTube type/class, strict instantiation below
 import { SpotifyPlugin } from '@distube/spotify';
 import { SoundCloudPlugin } from '@distube/soundcloud';
 // import { YtDlpPlugin } from '@distube/yt-dlp';
@@ -7,14 +7,7 @@ import { YtDlpPlugin } from './plugins/YtDlpPlugin.js'; // Use custom plugin to 
 import ffmpeg from 'ffmpeg-static';
 import * as fs from 'fs';
 
-export const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
+export const client = new ExtendedClient();
 
 const cookies = (() => {
     try {

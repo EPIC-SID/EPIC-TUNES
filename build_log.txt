@@ -1,0 +1,5 @@
+
+> epic-tunes@1.0.0 build
+> tsc
+
+src/handlers/CommandHandler.ts(24,44): error TS2774: This condition will always return true since this function is always defined. Did you mean to call it instead?
