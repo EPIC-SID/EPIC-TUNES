@@ -68,6 +68,8 @@ export default {
                 const url = i.values[0];
                 const selectedVideo = videos.find((v: any) => v.url === url);
 
+                if (!selectedVideo) return;
+
                 await i.update({ content: `${Theme.Icons.Success} **Selected:** ${selectedVideo.title}`, embeds: [], components: [] });
 
                 await distube.play(voiceChannel, url, {
