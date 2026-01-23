@@ -6,27 +6,38 @@ export default {
     name: Events.InteractionCreate,
     once: false,
     async execute(interaction: Interaction) {
-        if (!interaction.isChatInputCommand()) return;
-
         const client = interaction.client as ExtendedClient;
-        const command = client.commands.get(interaction.commandName);
 
-        if (!command) return;
+        if (interaction.isChatInputCommand()) {
+            const command = client.commands.get(interaction.commandName);
 
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
-            const errorEmbed = {
-                color: parseInt(Theme.Colors.Error.replace('#', ''), 16),
-                title: `${Theme.Icons.Error} Error`,
-                description: 'There was an error while executing this command!',
-            };
+            if (!command) return;
 
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
-            } else {
-                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            try {
+                await command.execute(interaction);
+            } catch (error) {
+                console.error(error);
+                const errorEmbed = {
+                    color: parseInt(Theme.Colors.Error.replace('#', ''), 16),
+                    title: `${Theme.Icons.Error} Error`,
+                    description: 'There was an error while executing this command!',
+                };
+
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+                } else {
+                    await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+                }
+            }
+        } else if (interaction.isAutocomplete()) {
+            const command = client.commands.get(interaction.commandName);
+
+            if (!command || !command.autocomplete) return;
+
+            try {
+                await command.autocomplete(interaction);
+            } catch (error) {
+                console.error(error);
             }
         }
     },

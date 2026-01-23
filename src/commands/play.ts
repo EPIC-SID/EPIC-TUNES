@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, GuildMember, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, GuildMember, EmbedBuilder, AutocompleteInteraction } from 'discord.js';
 import { distube } from '../client.js';
-
+import ytSearch from 'yt-search';
 import { Theme } from '../utils/theme.js';
 
 export default {
@@ -10,7 +10,8 @@ export default {
         .addStringOption(option =>
             option.setName('query')
                 .setDescription('The song you want to play (link or name)')
-                .setRequired(true)),
+                .setRequired(true)
+                .setAutocomplete(true)),
 
     async execute(interaction: any) {
         let query = interaction.options.getString('query', true);
@@ -80,4 +81,23 @@ export default {
             }
         }
     },
+
+    async autocomplete(interaction: AutocompleteInteraction) {
+        const focusedValue = interaction.options.getFocused();
+
+        if (!focusedValue) return;
+
+        try {
+            const result = await ytSearch(focusedValue);
+            const videos = result.videos.slice(0, 5).map(video => ({
+                name: video.title.length > 90 ? video.title.substring(0, 90) + '...' : video.title,
+                value: video.url
+            }));
+
+            await interaction.respond(videos);
+        } catch (error) {
+            console.error('[Autocomplete Error]', error);
+            await interaction.respond([]);
+        }
+    }
 };
