@@ -10,7 +10,8 @@ export default {
             option.setName('position')
                 .setDescription('The position of the song to remove (check /queue)')
                 .setRequired(true)
-                .setMinValue(1)),
+                .setMinValue(1)
+                .setAutocomplete(true)),
 
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
@@ -41,4 +42,21 @@ export default {
             return interaction.reply({ content: `${Theme.Icons.Error} An error occurred while trying to remove the song.`, ephemeral: true });
         }
     },
+    async autocomplete(interaction: any) {
+        const queue = distube.getQueue(interaction.guildId);
+
+        if (!queue || queue.songs.length <= 1) {
+            return interaction.respond([]);
+        }
+
+        const focusedValue = interaction.options.getFocused();
+        const songs = queue.songs.slice(1); // Skip currently playing song
+        const options = songs.map((song: any, index: number) => ({
+            name: `${index + 1}. ${song.name}`.substring(0, 100),
+            value: index + 1
+        }));
+
+        const filtered = options.filter((choice: any) => choice.name.toLowerCase().includes(focusedValue.toLowerCase()));
+        await interaction.respond(filtered.slice(0, 25));
+    }
 };

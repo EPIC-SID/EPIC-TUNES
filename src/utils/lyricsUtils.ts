@@ -30,11 +30,37 @@ export const getSongLyrics = async (query: string) => {
     }
 };
 
-export const createLyricsEmbed = (data: { title: string, artist: string, thumbnail: string, lyrics: string }) => {
-    return new EmbedBuilder()
-        .setColor(Theme.Colors.PremiumBlue as any) // Gold/Yellow ish
+const CHUNK_SIZE = 2048;
+
+export const chunkLyrics = (lyrics: string): string[] => {
+    if (lyrics.length <= CHUNK_SIZE) return [lyrics];
+
+    const chunks = [];
+    let currentChunk = '';
+    const lines = lyrics.split('\n');
+
+    for (const line of lines) {
+        if (currentChunk.length + line.length + 1 > CHUNK_SIZE) {
+            chunks.push(currentChunk);
+            currentChunk = '';
+        }
+        currentChunk += (currentChunk ? '\n' : '') + line;
+    }
+
+    if (currentChunk) {
+        chunks.push(currentChunk);
+    }
+
+    return chunks;
+};
+
+export const createLyricsEmbed = (data: { title: string, artist: string, thumbnail: string, lyrics: string }, page: number = 1, totalPages: number = 1) => {
+    const embed = new EmbedBuilder()
+        .setColor(Theme.Colors.PremiumBlue as any)
         .setTitle(`${Theme.Icons.Lyrics} Lyrics for ${data.title}`)
         .setThumbnail(data.thumbnail)
-        .setDescription(data.lyrics.length > 4096 ? data.lyrics.substring(0, 4093) + '...' : data.lyrics)
-        .setFooter({ text: `Provided by Genius • ${data.artist}` });
+        .setDescription(data.lyrics)
+        .setFooter({ text: `Provided by Genius • ${data.artist} • Page ${page}/${totalPages}` });
+
+    return embed;
 };
