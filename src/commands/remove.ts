@@ -11,7 +11,12 @@ export default {
                 .setDescription('The position of the song to remove (check /queue)')
                 .setRequired(true)
                 .setMinValue(1)
-                .setAutocomplete(true)),
+                .setAutocomplete(true))
+        .addIntegerOption(option =>
+            option.setName('amount')
+                .setDescription('Amount of songs to remove (default: 1)')
+                .setRequired(false)
+                .setMinValue(1)),
 
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
@@ -21,6 +26,7 @@ export default {
         }
 
         const position = interaction.options.getInteger('position');
+        const amount = interaction.options.getInteger('amount') || 1;
 
         // Check bounds
         // songs[0] is playing. songs[1] is position 1.
@@ -28,18 +34,29 @@ export default {
             return interaction.reply({ content: `${Theme.Icons.Error} Invalid position! The queue only has **${queue.songs.length - 1}** upcoming songs.`, ephemeral: true });
         }
 
+        if (position + amount > queue.songs.length) {
+            return interaction.reply({ content: `${Theme.Icons.Error} Invalid range! You are trying to remove more songs than available.`, ephemeral: true });
+        }
+
         try {
-            // Remove the song
-            const removedSong = queue.songs.splice(position, 1)[0];
+            // Remove the songs
+            const removedSongs = queue.songs.splice(position, amount);
+            const firstSong = removedSongs[0];
+
+            let description = `${Theme.Icons.Trash} Removed **[${firstSong.name}](${firstSong.url})** from the queue.`;
+
+            if (removedSongs.length > 1) {
+                description = `${Theme.Icons.Trash} Removed **${removedSongs.length}** songs from the queue, starting with **[${firstSong.name}](${firstSong.url})**.`;
+            }
 
             const embed = new EmbedBuilder()
                 .setColor(Theme.Colors.Error as any) // Red for removal
-                .setDescription(`${Theme.Icons.Trash} Removed **[${removedSong.name}](${removedSong.url})** from the queue.`);
+                .setDescription(description);
 
             return interaction.reply({ embeds: [embed] });
         } catch (e) {
             console.error(e);
-            return interaction.reply({ content: `${Theme.Icons.Error} An error occurred while trying to remove the song.`, ephemeral: true });
+            return interaction.reply({ content: `${Theme.Icons.Error} An error occurred while trying to remove the song(s).`, ephemeral: true });
         }
     },
     async autocomplete(interaction: any) {
