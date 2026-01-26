@@ -26,3 +26,37 @@ export const checkDJPermission = (interaction: Interaction): boolean => {
 
     return false;
 };
+
+/**
+ * Checks if the user is in a voice channel.
+ * Returns an error message if not, otherwise returns null.
+ */
+export const checkUserInVoice = (interaction: Interaction): string | null => {
+    const member = interaction.member as GuildMember;
+    if (!member?.voice?.channel) {
+        return 'You need to be in a voice channel to use this command!';
+    }
+    return null;
+};
+
+/**
+ * Checks if the user is in the same voice channel as the bot.
+ * Returns an error message if not in same channel, otherwise returns null.
+ */
+export const checkSameVoiceChannel = (interaction: Interaction): string | null => {
+    if (!interaction.guild) return 'This command can only be used in a server!';
+
+    const member = interaction.member as GuildMember;
+    const botMember = interaction.guild.members.cache.get(interaction.client.user!.id);
+
+    if (!member?.voice?.channel) {
+        return 'You need to be in a voice channel!';
+    }
+
+    if (botMember?.voice?.channel && member.voice.channel.id !== botMember.voice.channel.id) {
+        return 'You need to be in the same voice channel as me!';
+    }
+
+    return null;
+};
+

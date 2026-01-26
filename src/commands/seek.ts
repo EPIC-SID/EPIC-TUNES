@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
 import { Theme } from '../utils/theme.js';
-import { checkDJPermission } from '../utils/permissionUtils.js';
+import { checkDJPermission, checkSameVoiceChannel } from '../utils/permissionUtils.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -20,6 +20,12 @@ export default {
                 content: `${Theme.Icons.Error} You need the DJ role or Administrator permission to use this command!`,
                 ephemeral: true
             });
+        }
+
+        // Check voice channel
+        const voiceError = checkSameVoiceChannel(interaction);
+        if (voiceError) {
+            return interaction.reply({ content: `${Theme.Icons.Error} ${voiceError}`, ephemeral: true });
         }
 
         const queue = distube.getQueue(interaction.guildId!);

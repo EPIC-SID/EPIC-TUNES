@@ -10,9 +10,12 @@ export default {
         const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${interaction.client.user.id}&permissions=8&scope=bot%20applications.commands`;
 
         const embed = new EmbedBuilder()
-            .setColor(Theme.Colors.Info as any) // Pink was used, but Info fits "Invite Me"? Or PremiumBlue.
-            .setTitle(`💌 Invite Me!`)
-            .setDescription('Click the button below to add me to your server.');
+            .setColor(Theme.Colors.PremiumBlue as any)
+            .setTitle('💌 Invite EPIC TUNES')
+            .setDescription('Add me to your server and enjoy premium music features!\n\n✨ **Features:**\n• High-quality audio streaming\n• Multi-platform support (YouTube, Spotify, SoundCloud)\n• 24/7 music playback\n• Advanced queue management')
+            .setThumbnail(interaction.client.user.displayAvatarURL())
+            .setFooter({ text: 'EPIC TUNES • Advanced Audio System', iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp();
 
         const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(
