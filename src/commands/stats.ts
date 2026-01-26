@@ -26,6 +26,7 @@ export default {
                 { name: '⏳ Uptime', value: `\`${days}d ${hours}h ${minutes}m\``, inline: true },
                 { name: '📡 Ping', value: `\`${client.ws.ping}ms\``, inline: true },
                 { name: '💾 Memory', value: `\`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB\``, inline: true },
+                { name: '⚡ CPU', value: `\`${(process.cpuUsage().user / 1000000).toFixed(2)}s\``, inline: true },
                 { name: '💻 Platform', value: `\`${os.platform()}\``, inline: true },
                 { name: '🟢 Node.js', value: `\`${process.version}\``, inline: true },
                 { name: '🔵 Discord.js', value: `\`v${djsVersion}\``, inline: true }

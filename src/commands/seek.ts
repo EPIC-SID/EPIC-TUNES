@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
 import { Theme } from '../utils/theme.js';
+import { checkDJPermission } from '../utils/permissionUtils.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -13,16 +14,38 @@ export default {
                 .setMinValue(0)
         ),
     async execute(interaction: any) {
+        // Check DJ permissions
+        if (!checkDJPermission(interaction)) {
+            return interaction.reply({
+                content: `${Theme.Icons.Error} You need the DJ role or Administrator permission to use this command!`,
+                ephemeral: true
+            });
+        }
+
         const queue = distube.getQueue(interaction.guildId!);
         if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
 
-        const time = interaction.options.getInteger('seconds');
-        queue.seek(time);
+        let time = interaction.options.getInteger('seconds');
 
-        const embed = new EmbedBuilder()
-            .setColor(Theme.Colors.PremiumBlue as any)
-            .setDescription(`**${Theme.Icons.Forward} Creating time warp...**\nJumped to \`${time}s\`.`);
+        // Validate seek time doesn't exceed song duration
+        if (time > queue.songs[0].duration) {
+            time = queue.songs[0].duration;
+        }
 
-        return interaction.reply({ embeds: [embed] });
+        try {
+            queue.seek(time);
+
+            const embed = new EmbedBuilder()
+                .setColor(Theme.Colors.PremiumBlue as any)
+                .setTitle(`${Theme.Icons.Forward} Time Warp`)
+                .setDescription(`Jumped to \`${queue.formattedCurrentTime}\``)
+                .setFooter({ text: 'EPIC TUNES • Advanced Audio System', iconURL: interaction.user.displayAvatarURL() })
+                .setTimestamp();
+
+            return interaction.reply({ embeds: [embed] });
+        } catch (e) {
+            console.error(e);
+            return interaction.reply({ content: `${Theme.Icons.Error} Error: ${e}`, ephemeral: true });
+        }
     },
 };

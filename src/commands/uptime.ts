@@ -8,8 +8,8 @@ export default {
     async execute(interaction: any) {
         const uptime = process.uptime();
         const days = Math.floor(uptime / 86400);
-        const hours = Math.floor(uptime / 3600) % 24;
-        const minutes = Math.floor(uptime / 60) % 60;
+        const hours = Math.floor((uptime % 86400) / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
         const seconds = Math.floor(uptime % 60);
 
         const uptimeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
@@ -17,7 +17,9 @@ export default {
         const embed = new EmbedBuilder()
             .setColor(Theme.Colors.Info as any)
             .setTitle(`${Theme.Icons.Clock} System Uptime`)
-            .setDescription(`I have been online for: **${uptimeString}**`);
+            .setDescription(`I have been online for: **${uptimeString}**`)
+            .setFooter({ text: 'EPIC TUNES • Advanced Audio System', iconURL: interaction.user.displayAvatarURL() })
+            .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
     },
