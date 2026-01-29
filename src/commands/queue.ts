@@ -43,16 +43,35 @@ export default {
                     // Calculate overall index: start + i + 1 (because 0 is playing)
                     return `**${start + i + 1}.** [${song.name}](${song.url}) - \`${song.formattedDuration}\` (${song.user})`;
                 }).join('\n');
-                embed.addFields({ name: `⏳ Up Next (Page ${page + 1}/${totalPages})`, value: trackList, inline: false });
+                embed.addFields({
+                    name: `${Theme.Icons.Music} Up Next (Page ${page + 1}/${totalPages})`,
+                    value: trackList,
+                    inline: false
+                });
             } else {
-                embed.addFields({ name: '⏳ Up Next', value: 'No more songs in queue.', inline: false });
+                embed.addFields({
+                    name: `${Theme.Icons.Music} Up Next`,
+                    value: '_No more songs in queue._',
+                    inline: false
+                });
             }
 
             const totalDuration = queue.formattedDuration;
             const totalSongs = queue.songs.length;
+
+            // Add loop and autoplay info
+            const loopMode = queue.repeatMode === 0 ? 'Off' : queue.repeatMode === 1 ? 'Song' : 'Queue';
+            const autoplayStatus = queue.autoplay ? 'On' : 'Off';
+
+            embed.addFields({
+                name: `${Theme.Icons.Settings} Queue Settings`,
+                value: `Loop: \`${loopMode}\` | Autoplay: \`${autoplayStatus}\` | Volume: \`${queue.volume}%\``,
+                inline: false
+            });
+
             embed.setFooter({
-                text: `Page ${page + 1}/${totalPages} | Total Songs: ${totalSongs} | Total Duration: ${totalDuration}`,
-                iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp' // Maybe use Theme icon?
+                text: `Page ${page + 1}/${totalPages} | Total: ${totalSongs} songs | Duration: ${totalDuration}`,
+                iconURL: 'https://cdn.discordapp.com/emojis/995646193796333578.webp'
             });
 
             return embed;

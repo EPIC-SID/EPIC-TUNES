@@ -1,56 +1,67 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { distube } from '../client.js';
+import { checkDJPermission, createDJPermissionError } from '../utils/permissionUtils.js';
 import { Theme } from '../utils/theme.js';
-import { checkDJPermission, checkSameVoiceChannel } from '../utils/permissionUtils.js';
+import { formatDuration } from '../utils/formatters.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('rewind')
-        .setDescription('Rewind the song by seconds')
+        .setDescription('Rewind the current song by specified seconds')
         .addIntegerOption(option =>
             option.setName('seconds')
-                .setDescription('Seconds to rewind (default: 10)')
+                .setDescription('Number of seconds to rewind')
+                .setRequired(true)
                 .setMinValue(1)
+                .setMaxValue(300)
         ),
     async execute(interaction: any) {
-        // Check DJ permissions
+        // DJ Permission Check
         if (!checkDJPermission(interaction)) {
+            return interaction.reply({ embeds: [createDJPermissionError(interaction.guildId!)], ephemeral: true });
+        }
+
+        const queue = distube.getQueue(interaction.guildId!);
+        if (!queue) {
             return interaction.reply({
-                content: `${Theme.Icons.Error} You need the DJ role or Administrator permission to use this command!`,
+                content: `${Theme.Icons.Error} No music is playing!`,
                 ephemeral: true
             });
         }
 
-        // Check voice channel
-        const voiceError = checkSameVoiceChannel(interaction);
-        if (voiceError) {
-            return interaction.reply({ content: `${Theme.Icons.Error} ${voiceError}`, ephemeral: true });
-        }
-
-        const queue = distube.getQueue(interaction.guildId!);
-        if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
-
-        const seconds = interaction.options.getInteger('seconds') || 10;
-        const currentField = queue.currentTime;
-        let seekTime = currentField - seconds;
-
-        if (seekTime < 0) {
-            seekTime = 0; // Prevent seeking before start
-        }
+        const seconds = interaction.options.getInteger('seconds', true);
+        const currentTime = queue.currentTime;
+        const newTime = Math.max(0, currentTime - seconds);
 
         try {
-            queue.seek(seekTime);
-            const embed = new EmbedBuilder()
-                .setColor(Theme.Colors.PremiumBlue as any)
-                .setTitle(`${Theme.Icons.Rewind} Rewinding`)
-                .setDescription(`Rewound **${seconds}s**\nNow at: \`${queue.formattedCurrentTime}\``)
-                .setFooter({ text: 'EPIC TUNES • Advanced Audio System', iconURL: interaction.user.displayAvatarURL() })
-                .setTimestamp();
+            await queue.seek(newTime);
 
-            await interaction.reply({ embeds: [embed] });
-        } catch (e) {
-            console.error(e);
-            await interaction.reply({ content: `${Theme.Icons.Error} Error: ${e}`, ephemeral: true });
+            const embed = new EmbedBuilder()
+                .setColor(Theme.Colors.Info as any)
+                .setTitle(`${Theme.Icons.Rewind} Rewound`)
+                .setDescription(`**Rewound by ${seconds} seconds**`)
+                .addFields(
+                    {
+                        name: 'Current Position',
+                        value: `\`${formatDuration(newTime)}\` / \`${queue.songs[0].formattedDuration}\``,
+                        inline: true
+                    },
+                    {
+                        name: 'Now Playing',
+                        value: `[${queue.songs[0].name}](${queue.songs[0].url})`,
+                        inline: false
+                    }
+                )
+                .setThumbnail(queue.songs[0].thumbnail || null)
+                .setFooter({ text: 'Use /forward to skip ahead' });
+
+            return interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error('Rewind error:', error);
+            return interaction.reply({
+                content: `${Theme.Icons.Error} Failed to rewind. The position might be invalid.`,
+                ephemeral: true
+            });
         }
     },
 };

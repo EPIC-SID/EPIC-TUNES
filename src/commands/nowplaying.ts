@@ -1,11 +1,12 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { distube } from '../client.js';
 import { Theme } from '../utils/theme.js';
+import { createProgressBar } from '../utils/formatters.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('nowplaying')
-        .setDescription('Shows the currently playing song with progress'),
+        .setDescription('Shows the currently playing song with interactive controls'),
     async execute(interaction: any) {
         const queue = distube.getQueue(interaction.guildId!);
         if (!queue) return interaction.reply({ content: `${Theme.Icons.Error} No music playing!`, ephemeral: true });
@@ -14,13 +15,15 @@ export default {
             const song = queue.songs[0];
             const currentTime = queue.currentTime;
             const duration = song.duration;
-            const progress = Math.min((currentTime / duration) * 100, 100);
 
-            const size = 15;
-            const progressInt = Math.round((progress * size) / 100);
-            const emptyProg = size - progressInt;
-
-            const bar = '▇'.repeat(progressInt) + Theme.Icons.Disc + '—'.repeat(emptyProg);
+            // Use the new formatter utility
+            const progressBar = createProgressBar(currentTime, duration, {
+                length: 15,
+                filledChar: '▇',
+                emptyChar: '—',
+                indicator: Theme.Icons.Disc,
+                showPercentage: false
+            });
 
             return new EmbedBuilder()
                 .setColor(Theme.Colors.PremiumBlue as any)
@@ -30,7 +33,7 @@ export default {
                 .addFields(
                     {
                         name: `${Theme.Icons.Clock} Duration`,
-                        value: `\`${queue.formattedCurrentTime}\` ${bar} \`${song.formattedDuration}\``,
+                        value: `\`${queue.formattedCurrentTime}\` ${progressBar} \`${song.formattedDuration}\``,
                         inline: false
                     },
                     {
