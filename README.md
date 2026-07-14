@@ -1,6 +1,6 @@
 # EPIC TUNES
 
-**EPIC TUNES** is a high-performance, feature-rich Discord music bot designed for seamless audio experiences. Built with modern web technologies, it features a professional **Interactive Dashboard**, 24/7 uptime capability, and a sleek user interface.
+**EPIC TUNES** is a high-performance, feature-rich Discord music bot designed for seamless audio experiences. Built with modern web technologies, it features a professional **Interactive Dashboard**, 24/7 uptime capability, and a sleek user interface.   
 
 ---
 
@@ -17,7 +17,7 @@
   - `Settings`: Configure per-server settings.
 
 - **Advanced Audio Filters**:  
-  Apply real-time effects like `Bassboost`, `Nightcore`, `Vaporwave`, `3D`, and more.
+  Apply real-time effects like `Bassboost`, `Nightcore`, `Vaporwave`, `3D`, and much more.
 
 - **Custom Configuration**:  
   - Dynamic Prefix (`/prefix`) persistent per server.
